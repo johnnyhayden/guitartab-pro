@@ -1,0 +1,230 @@
+<context>
+# Overview  
+GuitarTab Pro is a comprehensive web-based guitar TAB and lyrics/chord organizer application designed for musicians, worship leaders, music therapists, and entertainers. The app solves the problem of managing and organizing guitar tabs, chord charts, and lyrics in a digital format, replacing physical binders and scattered digital files. It provides intelligent song search capabilities, customizable display formatting, and performance-ready features for live gigs and practice sessions.
+
+The application serves musicians who need to quickly find, organize, and display song materials during performances, rehearsals, or personal practice. It eliminates the need for paper songbooks and provides a modern, tablet-friendly interface that works seamlessly across devices.
+
+# Core Features  
+## Intelligent Song Search & Discovery
+- **Smart Song Search**: Find the most popular tab version of any song by title, with artist disambiguation when multiple versions exist
+- **API Integration**: Connects to multiple tab/lyrics APIs (Ultimate Guitar, Songsterr) for comprehensive song database
+- **Manual Input**: Allow users to upload and input their own custom tabs and chord charts
+- **Similar Songs**: Provide recommendations for similar songs based on genre, chord progressions, and user preferences
+- **Advanced Search**: Search by chord progression, genre, difficulty level, key, and tempo
+
+## User Management & Data Organization
+- **User Authentication**: Secure registration and login system with user-specific accounts
+- **Private Libraries**: Each user maintains their own private song library (no sharing between users)
+- **Song Metadata**: Comprehensive song data including title, artist, key, tempo, genre, difficulty, capo position, and chord progression timing
+- **Database Storage**: PostgreSQL backend for reliable, scalable data storage
+
+## Songlist Management & Performance Tools
+- **Gig Organization**: Create, manage, and organize songs into custom songlists for specific gigs or performances
+- **Drag & Drop Reordering**: Intuitive song reordering within songlists
+- **Set Management**: Organize songs into sets with breaks, encores, and time estimates
+- **Export/Import**: Share songlists or export for backup purposes
+
+## Professional Display & Customization
+- **Responsive Design**: Web-based interface optimized for desktop, tablet, and mobile devices
+- **Touch-Friendly**: Tablet-optimized controls for stage performance
+- **Customizable Formatting**: Global color schemes with full color pickers for chords, lyrics, background, and titles
+- **Professional Display**: Beautifully formatted song display (not plain monospace) with chords positioned above lyrics
+- **Offline Capability**: Download songs for gigs without internet connectivity
+
+## Performance Features
+- **Full-Screen Mode**: Distraction-free display for stage performance
+- **Auto-Scroll**: Automatic scrolling during performance with adjustable speed
+- **Metronome Integration**: Built-in metronome with tempo control
+- **Key Transposition**: Transpose songs to different keys while maintaining chord relationships
+- **Stage Mode**: Optimized interface for live performance with large, clear text
+
+# User Experience  
+## User Personas
+- **Worship Leaders**: Need quick access to worship songs, ability to create setlists for services, and share materials with team
+- **Live Entertainers**: Require fast song switching, professional display, and comprehensive song libraries for diverse audiences
+- **Music Therapists**: Need portable, accessible song materials for healthcare settings with easy organization
+- **Songwriters**: Want to store and organize their own compositions alongside popular covers
+- **Practice Musicians**: Need organized practice materials with customizable display for different learning styles
+
+## Key User Flows
+1. **New User Onboarding**: Registration → Song search/import → Create first songlist → Customize display settings
+2. **Daily Practice**: Login → Search for song → Add to practice songlist → Practice with metronome/transpose
+3. **Gig Preparation**: Create new songlist → Search/add songs → Reorder set → Test full-screen mode
+4. **Live Performance**: Open songlist → Full-screen mode → Auto-scroll through songs → Quick song switching
+5. **Song Management**: Search for new songs → Add to library → Organize into songlists → Customize display
+
+## UI/UX Considerations
+- **Mobile-First Design**: Responsive layout that works on phones, tablets, and desktops
+- **Touch Optimization**: Large buttons and touch targets for tablet use
+- **Accessibility**: High contrast modes, large text options, keyboard navigation
+- **Performance Focus**: Minimal UI distractions during live performance
+- **Customization**: Easy access to color and display settings
+- **Offline Indicators**: Clear visual feedback when songs are available offline
+</context>
+<PRD>
+# Technical Architecture  
+## System Components
+- **Frontend**: Responsive web application built with HTML5, CSS3, and JavaScript (Vue.js or React)
+- **Backend**: Python Flask REST API server
+- **Database**: PostgreSQL for user data, songs, songlists, and metadata
+- **Authentication**: JWT-based user authentication with secure password hashing
+- **File Storage**: Local file system for uploaded tabs and media files
+- **Search Engine**: Full-text search capabilities for song discovery
+- **Caching**: Redis for session management and frequently accessed data
+
+## Data Models
+### Users Table
+- user_id (Primary Key)
+- username, email, password_hash
+- created_at, last_login
+- preferences (color schemes, display settings)
+
+### Songs Table
+- song_id (Primary Key)
+- title, artist, genre, key, tempo
+- difficulty_level, capo_position
+- chord_progression, lyrics
+- source (api/manual), source_id
+- created_by (user_id), created_at
+
+### Songlists Table
+- songlist_id (Primary Key)
+- name, description, user_id
+- created_at, updated_at
+- is_public (boolean)
+
+### Songlist_Songs Table (Many-to-Many)
+- songlist_id, song_id
+- position, notes
+- added_at
+
+### User_Preferences Table
+- user_id (Primary Key)
+- chord_color, lyric_color, background_color
+- title_color, font_size, auto_scroll_speed
+- metronome_settings, display_mode
+
+## APIs and Integrations
+- **Ultimate Guitar API**: For popular tab retrieval
+- **Songsterr API**: For additional tab sources
+- **Lyrics APIs**: For song lyrics and metadata
+- **REST API Endpoints**: User management, song CRUD, songlist management, search
+- **WebSocket**: Real-time updates for collaborative features (future)
+
+## Infrastructure Requirements
+- **Local Development**: Python 3.8+, PostgreSQL 12+, Redis (optional)
+- **Web Server**: Flask development server (local) or Gunicorn (production)
+- **Database**: PostgreSQL with full-text search extensions
+- **File System**: Local storage for uploaded files and cached data
+- **SSL**: HTTPS for production deployment
+- **Backup**: Automated database backups for user data protection
+
+# Development Roadmap  
+## Phase 1: MVP Foundation (Core Functionality)
+- **User Authentication System**: Registration, login, password reset
+- **Basic Database Schema**: Users, Songs, Songlists tables
+- **Simple Song Management**: Manual song input with basic metadata
+- **Basic Search**: Simple title/artist search functionality
+- **Minimal UI**: Basic responsive web interface
+- **Core Song Display**: Simple chord/lyric formatting
+
+## Phase 2: Enhanced Search & Import (Data Integration)
+- **API Integration**: Connect to Ultimate Guitar and Songsterr APIs
+- **Advanced Search**: Full-text search with filters (genre, difficulty, key)
+- **Song Import**: Automated song import from APIs
+- **Similar Songs**: Basic recommendation system
+- **Improved UI**: Better responsive design and user experience
+
+## Phase 3: Organization & Customization (User Experience)
+- **Songlist Management**: Create, edit, reorder songlists
+- **Drag & Drop**: Intuitive song reordering interface
+- **Display Customization**: Color picker system for global themes
+- **Professional Formatting**: Enhanced song display with proper chord positioning
+- **Set Management**: Organize songs into sets with breaks and timing
+
+## Phase 4: Performance Features (Live Use)
+- **Full-Screen Mode**: Distraction-free performance interface
+- **Auto-Scroll**: Configurable automatic scrolling
+- **Metronome**: Built-in metronome with tempo control
+- **Key Transposition**: Transpose songs to different keys
+- **Touch Optimization**: Tablet-friendly controls and gestures
+
+## Phase 5: Advanced Features (Polish & Enhancement)
+- **Offline Capability**: Download songs for offline use
+- **Export/Import**: Songlist sharing and backup features
+- **Advanced Search**: Chord progression search and complex filters
+- **Performance Analytics**: Practice tracking and song usage statistics
+- **Mobile App**: Native mobile application (future consideration)
+
+# Logical Dependency Chain
+## Foundation Layer (Must Build First)
+1. **Database Setup**: PostgreSQL schema creation and basic models
+2. **User Authentication**: JWT-based auth system with secure password handling
+3. **Basic Flask API**: Core REST endpoints for user and song management
+4. **Frontend Framework**: Basic responsive web interface setup
+
+## Core Functionality Layer (Build Upon Foundation)
+1. **Song CRUD Operations**: Create, read, update, delete songs
+2. **Basic Search**: Simple text-based song search
+3. **Song Display**: Basic chord/lyric formatting and display
+4. **User Preferences**: Basic settings storage and retrieval
+
+## Data Integration Layer (Enhance Core)
+1. **API Integration**: Connect to external tab/lyrics APIs
+2. **Advanced Search**: Full-text search with multiple filters
+3. **Song Import**: Automated import from external sources
+4. **Similar Songs**: Recommendation algorithm implementation
+
+## User Experience Layer (Polish & Organize)
+1. **Songlist Management**: Create and manage song collections
+2. **Drag & Drop Interface**: Intuitive song organization
+3. **Display Customization**: Color themes and formatting options
+4. **Responsive Optimization**: Tablet and mobile optimization
+
+## Performance Layer (Live Use Ready)
+1. **Full-Screen Mode**: Performance-optimized display
+2. **Auto-Scroll**: Configurable scrolling for live performance
+3. **Metronome**: Tempo and timing tools
+4. **Key Transposition**: Musical key adjustment features
+
+# Risks and Mitigations  
+## Technical Challenges
+- **API Rate Limits**: External APIs may have usage restrictions
+  - *Mitigation*: Implement caching, request queuing, and fallback to manual input
+- **Database Performance**: Large song libraries may impact search speed
+  - *Mitigation*: Implement proper indexing, full-text search, and pagination
+- **Mobile Performance**: Complex formatting may be slow on mobile devices
+  - *Mitigation*: Optimize rendering, implement lazy loading, and progressive enhancement
+
+## MVP Scope Management
+- **Feature Creep**: Risk of adding too many features before core functionality is solid
+  - *Mitigation*: Strict adherence to phase-based development, regular MVP testing
+- **API Dependencies**: Over-reliance on external APIs for core functionality
+  - *Mitigation*: Ensure manual input is always available as fallback
+- **User Experience Complexity**: Too many options may confuse users
+  - *Mitigation*: Start with sensible defaults, progressive disclosure of advanced features
+
+## Resource Constraints
+- **Development Time**: Complex features may take longer than expected
+  - *Mitigation*: Prioritize core functionality, use proven libraries and frameworks
+- **API Costs**: External API usage may incur costs
+  - *Mitigation*: Implement efficient caching, consider free tiers, plan for paid tiers
+- **Database Scaling**: User growth may require database optimization
+  - *Mitigation*: Design scalable schema from start, implement proper indexing
+
+# Appendix  
+## Research Findings
+- **OnSong App Analysis**: Reference implementation showing successful features for musicians
+- **API Research**: Ultimate Guitar and Songsterr provide comprehensive tab databases
+- **User Feedback**: Musicians prioritize speed, reliability, and customization
+- **Technical Standards**: Web-based solutions preferred for cross-platform compatibility
+
+## Technical Specifications
+- **Python Version**: 3.8+ for Flask compatibility
+- **Database**: PostgreSQL 12+ with full-text search
+- **Frontend**: Modern JavaScript framework (Vue.js or React)
+- **Authentication**: JWT tokens with secure password hashing (bcrypt)
+- **File Formats**: Support for common tab formats (TXT, PDF, custom JSON)
+- **Browser Support**: Modern browsers with ES6+ support
+- **Mobile Support**: iOS Safari 12+, Android Chrome 70+
+</PRD>

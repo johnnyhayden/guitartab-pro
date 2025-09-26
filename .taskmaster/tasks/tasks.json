@@ -1,0 +1,318 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": "1",
+        "title": "Setup Project Repository",
+        "description": "Initialize the project repository with version control and basic project structure.",
+        "details": "Create a new Git repository for the project. Set up the basic directory structure for frontend and backend components. Initialize package managers for frontend (npm/yarn) and backend (pipenv/virtualenv).",
+        "testStrategy": "Verify that the repository is accessible and the initial structure is correctly set up by cloning and running basic commands.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "in-progress",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Initialize Git repository and remote",
+            "description": "Create the project root, initialize a Git repository with main branch, add baseline files (.gitignore, README, LICENSE), create/connect a remote repository, make the initial commit, and push.",
+            "dependencies": [],
+            "details": "- Create project directory and initialize Git: mkdir <project-name> && cd <project-name> && git init -b main\n- Create baseline files:\n  - README.md: include project name, summary, and high-level structure goals\n  - LICENSE: choose MIT or appropriate license\n  - .gitignore: include common Node, Python, and OS ignores (e.g., node_modules/, dist/, build/, .venv/, __pycache__/, .DS_Store, .env, .pytest_cache/)\n  - .gitattributes: text=auto eol=lf (optional)\n- Create and connect remote repo:\n  - Using GitHub CLI: gh repo create <org-or-user>/<repo> --public --source=. --remote=origin --push\n  - Or create manually on hosting provider, then: git remote add origin git@github.com:<org-or-user>/<repo>.git\n- First commit and push: git add . && git commit -m \"chore: initial repository setup\" && git push -u origin main\n- Configure repository settings (optional): default branch main, protect main branch, require PR reviews.",
+            "status": "in-progress",
+            "testStrategy": "Run git remote -v to confirm remote connection. Visit the remote host to verify the repository exists and initial files are present. Optionally git clone <repo-url> ../tmp-clone and verify contents.",
+            "parentId": "undefined",
+            "updatedAt": "2025-09-26T21:45:08.967Z"
+          },
+          {
+            "id": 2,
+            "title": "Create base project directory structure",
+            "description": "Establish a clear directory layout for frontend, backend, and project support assets to scaffold subsequent work.",
+            "dependencies": [],
+            "details": "- Create directories: mkdir -p frontend src placeholder if needed; mkdir -p backend; mkdir -p docs; mkdir -p scripts; mkdir -p .github/workflows\n- Add placeholder files so empty dirs are tracked: touch frontend/README.md backend/README.md docs/README.md scripts/README.md\n- Add an .editorconfig at repo root to enforce consistency (e.g., root=true; indent_size=2; end_of_line=lf; insert_final_newline=true)\n- Update README.md with a short directory layout section and contribution/getting started notes\n- Commit: git add . && git commit -m \"chore: scaffold base project structure\" && git push",
+            "status": "pending",
+            "testStrategy": "List files (e.g., tree -a -L 2 or ls -la) and verify directories exist and are tracked. Confirm README includes the structure overview.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Initialize frontend package manager (npm) and baseline configs",
+            "description": "Set up Node.js tooling for the frontend with npm, add minimal lint/format configuration, and create placeholder source structure.",
+            "dependencies": [],
+            "details": "- Ensure Node.js LTS is available (e.g., nvm install --lts && nvm use; echo \"$(node -v)\" > frontend/.nvmrc)\n- Initialize npm in frontend: cd frontend && npm init -y\n- Create src and entry file: mkdir -p src && echo \"console.log('frontend initialized');\" > src/index.js\n- Add lint/format tooling: npm install -D eslint prettier eslint-config-prettier eslint-plugin-import\n- Create .eslintrc.json:\n  { \"env\": {\"browser\": true, \"es2021\": true, \"node\": true}, \"extends\": [\"eslint:recommended\", \"prettier\"], \"parserOptions\": {\"ecmaVersion\": 2021, \"sourceType\": \"module\"}, \"rules\": {} }\n- Create .prettierrc: {}\n- Add npm scripts to package.json: \"scripts\": { \"lint\": \"eslint \\\"src/**/*.js\\\"\", \"format\": \"prettier --write \\\"src/**/*.{js,json,md}\\\"\", \"format:check\": \"prettier --check \\\"src/**/*.{js,json,md}\\\"\" }\n- Commit: git add . && git commit -m \"chore(frontend): initialize npm and lint/format configs\" && git push\n- Note: If using Yarn instead of npm, run yarn init -y and replace npm commands accordingly.",
+            "status": "pending",
+            "testStrategy": "From frontend/: run npm install to ensure dependencies install; run npm run lint and npm run format:check to confirm tooling works. Confirm src/index.js exists and no lint errors are reported.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Initialize backend Python environment (pipenv) and baseline structure",
+            "description": "Set up Python virtual environment with pipenv for the backend and create a minimal backend scaffolding.",
+            "dependencies": [],
+            "details": "- Ensure Python 3.11+ is available (e.g., pyenv install 3.11.x && pyenv local 3.11.x in backend/ if using pyenv)\n- Initialize pipenv in backend: cd backend && pipenv --python 3.11\n- Optionally add dev tools: pipenv install --dev black flake8 isort\n- Create basic structure: mkdir -p src/app && touch src/app/__init__.py && echo \"print('backend initialized')\" > src/app/main.py\n- Create config files (optional but recommended):\n  - .flake8 with basic rules (e.g., [flake8] max-line-length = 100; extend-ignore = E203,W503)\n  - pyproject.toml for Black/isort configuration (e.g., [tool.black] line-length = 100; [tool.isort] profile = \"black\")\n  - .env.example with placeholders (e.g., FLASK_ENV=development; DATABASE_URL=postgresql://user:pass@localhost:5432/db)\n- Add basic Makefile in backend/ with recipes: install (pipenv install --dev), fmt (pipenv run black . && pipenv run isort .), lint (pipenv run flake8)\n- Commit: git add . && git commit -m \"chore(backend): initialize pipenv and baseline structure\" && git push",
+            "status": "pending",
+            "testStrategy": "From backend/: run pipenv run python src/app/main.py and verify output. If dev tools installed, run pipenv run black --version and pipenv run flake8 to confirm they execute.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Configure pre-commit hooks and CI, then validate by cloning",
+            "description": "Add repository-wide pre-commit hooks for basic hygiene and a CI workflow to verify installs for frontend and backend. Validate setup by cloning and running basic commands.",
+            "dependencies": [],
+            "details": "- Pre-commit setup (root):\n  - If using pipenv, install: cd backend && pipenv install --dev pre-commit && cd ..\n  - Create .pre-commit-config.yaml at repo root with hooks: trailing-whitespace, end-of-file-fixer, check-yaml, check-merge-conflict, mixed-line-ending; plus language-specific (optional): black, isort (repo: psf/black, PyCQA/isort), flake8; prettier (repo: pre-commit/mirrors-prettier, target frontend files)\n  - Install hooks: pre-commit install (run via pipenv: pipenv run pre-commit install from backend/ or use a global pre-commit install)\n- CI setup (GitHub Actions): create .github/workflows/ci.yml with two jobs on push/pull_request:\n  - frontend job: actions/setup-node@v4 (lts), working-directory: frontend, run: npm ci || npm install, then npm run lint and npm run format:check\n  - backend job: actions/setup-python@v5 (3.11), install pipenv, working-directory: backend, run: pipenv --python 3.11 && pipenv install --dev, then optional lint (pipenv run flake8)\n- Update README with CI status badge and local development instructions (frontend and backend basic commands)\n- Final validation by cloning fresh:\n  - In a separate directory: git clone <repo-url> fresh-clone && cd fresh-clone\n  - Run frontend check: cd frontend && npm install && npm run lint && cd ..\n  - Run backend check: cd backend && pipenv install --dev && pipenv run python src/app/main.py && cd ..\n  - Run pre-commit across repo: (from backend/) pipenv run pre-commit run --all-files",
+            "status": "pending",
+            "testStrategy": "Open a pull request to trigger CI and confirm both jobs pass. Locally, verify pre-commit blocks malformed changes. Validate a fresh clone can install and run the basic commands without errors.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 6,
+            "title": "Configure .gitignore, .gitattributes, and .editorconfig",
+            "description": "Add standard ignore rules and text/line-ending normalization to ensure a clean, cross-platform repository.",
+            "dependencies": [],
+            "details": "Create a root-level .gitignore covering Python (.venv, venv, __pycache__, *.pyc, .pytest_cache, .mypy_cache, coverage/), Node (node_modules/, dist/, build/, .next/, coverage/), IDE/OS (.DS_Store, .idea/, .vscode/), env files (.env, .env.*), logs (*.log), and lockfiles as needed; add .gitattributes to enforce text eol=lf by default, mark common binaries (e.g., *.png, *.jpg, *.pdf) as binary, and set linguist settings if needed; add .editorconfig to standardize indentation (2 spaces for JS/TS/JSON/YAML, 4 spaces for Python), UTF-8, LF line endings, final newline, and trimming trailing whitespace.",
+            "status": "pending",
+            "testStrategy": "Run `git check-ignore -v` on representative files to confirm ignore coverage; stage files with `git add -A` and verify no unwanted artifacts are tracked; confirm line endings with `git ls-files --eol`; ensure editors pick up .editorconfig by saving sample files.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 7,
+            "title": "Initialize repository documentation and policies",
+            "description": "Create foundational repo docs and community health files to guide contributors and clarify licensing.",
+            "dependencies": [
+              "1.6"
+            ],
+            "details": "Add README.md with project overview, architecture layout (frontend/backend), quick start, and development scripts; choose and add LICENSE (e.g., MIT) and note year/owner; add CONTRIBUTING.md (branching strategy, Conventional Commits, code style, PR process), CODE_OF_CONDUCT.md, and SECURITY.md (vulnerability reporting); create CHANGELOG.md with Keep a Changelog format; add .github/ISSUE_TEMPLATE (bug_report.yml, feature_request.yml) and .github/PULL_REQUEST_TEMPLATE.md; include status badges placeholders for CI and coverage.",
+            "status": "pending",
+            "testStrategy": "Preview README locally to verify sections render; run a markdown linter (e.g., markdownlint) to ensure formatting; check that GitHub recognizes the license and templates by attempting to open a new issue/PR; verify links with a link checker.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 8,
+            "title": "Create environment templates and bootstrap scripts",
+            "description": "Provide reproducible setup via env templates and scripted bootstrapping for frontend and backend.",
+            "dependencies": [
+              "1.6"
+            ],
+            "details": "Add backend/.env.example (e.g., DATABASE_URL, JWT_SECRET, FLASK_ENV) and frontend/.env.example (e.g., VITE_API_BASE_URL or NEXT_PUBLIC_API_BASE_URL); add .nvmrc (Node 20.x) and .python-version (e.g., 3.11) for tooling consistency; create Makefile (or Taskfile) with targets: setup, backend.install, frontend.install, lint, format, test, run, clean; add scripts/bootstrap.sh (POSIX) and scripts/bootstrap.ps1 (Windows) to install Python env (virtualenv/pipenv), Node deps (npm ci or yarn install), and pre-commit; ensure package.json scripts exist for lint/test/build in frontend; commit lockfiles (Pipfile.lock/poetry.lock; package-lock.json/yarn.lock) if applicable.",
+            "status": "pending",
+            "testStrategy": "From a fresh clone, run the bootstrap or `make setup` and verify: Python env created, dependencies installed, Node deps installed, and pre-commit installed; copy .env.example to .env for both apps and confirm commands `make lint` and `make test` run without errors; confirm Node and Python versions via the files are honored.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 9,
+            "title": "Set up code quality and git hooks (pre-commit, linters, formatters, secret scan)",
+            "description": "Configure automated formatting, linting, type checks, and secret scanning enforced via git hooks.",
+            "dependencies": [
+              "1.6",
+              "1.8"
+            ],
+            "details": "Add .pre-commit-config.yaml with hooks: black, isort, ruff or flake8, trailing-whitespace, end-of-file-fixer, detect-secrets; configure pyproject.toml for black/isort/ruff settings; for frontend, add ESLint (.eslintrc) and Prettier (.prettierrc) with compatible rules; add npm scripts `lint`, `format`, and `lint:fix`; integrate commit message linting using @commitlint/config-conventional with a commit-msg hook (via pre-commit or Husky if needed); document usage in README; ensure CI can run the same checks.",
+            "status": "pending",
+            "testStrategy": "Run `pre-commit run --all-files` to validate hooks; introduce intentionally misformatted files and ensure hooks fail and auto-fix where applicable; attempt a commit with a non-conforming message and confirm it is blocked; run `npm run lint` and Python linters to verify no errors.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 10,
+            "title": "Configure CI workflows (GitHub Actions) for linting and tests",
+            "description": "Add CI pipelines for backend and frontend to run on pushes/PRs with caching, artifacts, and coverage.",
+            "dependencies": [
+              "1.8",
+              "1.9"
+            ],
+            "details": "Create .github/workflows/backend.yml to set up Python (3.11), install deps (cache pip), run pre-commit, unit tests, and upload coverage (e.g., to Codecov) on push/pull_request; create frontend.yml to set up Node (20.x), install deps with npm ci (cache), run lint, tests, and build; define concurrency groups and required checks for main branch; add status badges to README; optionally add a workflow to validate PR titles against Conventional Commits.",
+            "status": "pending",
+            "testStrategy": "Open a draft PR to trigger workflows and verify all jobs pass; inspect workflow logs for cache hits and coverage upload; test a failing lint or test to ensure CI blocks merges; enable branch protection requiring the CI checks to pass before merging.",
+            "parentId": "undefined"
+          }
+        ],
+        "updatedAt": "2025-09-26T21:45:08.967Z"
+      },
+      {
+        "id": "2",
+        "title": "Database Schema Design",
+        "description": "Design and implement the PostgreSQL database schema for users, songs, and songlists.",
+        "details": "Create tables for Users, Songs, Songlists, Songlist_Songs, and User_Preferences. Define primary keys, foreign keys, and necessary indexes. Use SQLAlchemy for ORM mapping in the backend.",
+        "testStrategy": "Run database migration scripts and verify the schema using database inspection tools. Ensure all tables and relationships are correctly established.",
+        "priority": "medium",
+        "dependencies": [
+          "1"
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": "3",
+        "title": "User Authentication System",
+        "description": "Implement JWT-based user authentication with secure password handling.",
+        "details": "Use Flask-JWT-Extended for JWT handling and bcrypt for password hashing. Implement registration, login, and password reset endpoints. Store user credentials securely in the database.",
+        "testStrategy": "Write unit tests for authentication endpoints. Verify JWT tokens are issued and validated correctly. Test password hashing and storage security.",
+        "priority": "high",
+        "dependencies": [
+          "2"
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": "4",
+        "title": "Basic Flask API Setup",
+        "description": "Set up the core REST API endpoints for user and song management.",
+        "details": "Create a Flask application with endpoints for CRUD operations on users and songs. Implement basic error handling and input validation.",
+        "testStrategy": "Use Postman or similar tools to test API endpoints. Write integration tests to ensure endpoints function as expected.",
+        "priority": "medium",
+        "dependencies": [
+          "3"
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": "5",
+        "title": "Frontend Framework Initialization",
+        "description": "Initialize the frontend using a modern JavaScript framework (Vue.js or React).",
+        "details": "Set up a new project using Vue CLI or Create React App. Configure routing and state management (Vuex or Redux). Implement a basic responsive layout.",
+        "testStrategy": "Verify the frontend builds and runs without errors. Test routing and state management through browser testing.",
+        "priority": "medium",
+        "dependencies": [
+          "1"
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": "6",
+        "title": "Song CRUD Operations",
+        "description": "Implement create, read, update, and delete operations for songs in the backend.",
+        "details": "Develop API endpoints for song CRUD operations. Ensure proper validation and error handling. Integrate with the database using SQLAlchemy.",
+        "testStrategy": "Write unit and integration tests for each CRUD operation. Verify database changes through direct inspection.",
+        "priority": "medium",
+        "dependencies": [
+          "4"
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": "7",
+        "title": "Basic Search Functionality",
+        "description": "Implement simple text-based search for songs by title and artist.",
+        "details": "Use PostgreSQL full-text search capabilities to implement search functionality. Create API endpoints to handle search queries.",
+        "testStrategy": "Test search functionality with various queries. Validate results against expected outcomes.",
+        "priority": "medium",
+        "dependencies": [
+          "6"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Add PostgreSQL full-text search vector and GIN index for Songs",
+            "description": "Create a tsvector search column for the Songs table combining title and artist, and index it to enable fast full-text search.",
+            "dependencies": [],
+            "details": "Implementation approach (Alembic migration + SQLAlchemy):\n1) Create an Alembic migration that:\n   - Ensures required extensions exist (optional but recommended):\n     - op.execute(\"CREATE EXTENSION IF NOT EXISTS pg_trgm\")  // optional, not strictly needed for FTS\n     - op.execute(\"CREATE EXTENSION IF NOT EXISTS unaccent\")  // optional if you want diacritic-insensitive search\n   - Adds a STORED generated column (PostgreSQL 12+):\n     op.execute(\"\"\"\n       ALTER TABLE songs\n       ADD COLUMN search_vector tsvector GENERATED ALWAYS AS (\n         setweight(to_tsvector('simple', coalesce(title, '')), 'A') ||\n         setweight(to_tsvector('simple', coalesce(artist, '')), 'B')\n       ) STORED\n     \"\"\");\n     // Use 'simple' config to avoid stemming of names; switch to 'english' if desired.\n   - Creates a GIN index on search_vector:\n     op.execute(\"CREATE INDEX IF NOT EXISTS idx_songs_search_vector ON songs USING GIN (search_vector)\");\n   - If STORED generated columns are not available in your environment, fall back to:\n     - Add a plain tsvector column search_vector\n     - Backfill: UPDATE songs SET search_vector = setweight(to_tsvector('simple', coalesce(title, '')), 'A') || setweight(to_tsvector('simple', coalesce(artist, '')), 'B');\n     - Add trigger to keep it updated:\n       op.execute(\"CREATE FUNCTION songs_search_vector_update() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN NEW.search_vector := setweight(to_tsvector('simple', coalesce(NEW.title, '')), 'A') || setweight(to_tsvector('simple', coalesce(NEW.artist, '')), 'B'); RETURN NEW; END $$;\");\n       op.execute(\"CREATE TRIGGER trg_songs_search_vector BEFORE INSERT OR UPDATE OF title, artist ON songs FOR EACH ROW EXECUTE FUNCTION songs_search_vector_update();\");\n     - Create the same GIN index as above.\n2) Update the SQLAlchemy model (if needed) to include the search_vector column as a deferred/read-only column for query use; it doesn’t need to be exposed via API.\n3) Run migration and verify the index exists.",
+            "status": "pending",
+            "testStrategy": "Post-migration verification: SELECT to_regclass('public.idx_songs_search_vector') should not be NULL. Seed a few songs, run an EXPLAIN on a sample FTS query (WHERE search_vector @@ websearch_to_tsquery('simple', 'beatles')) and confirm the GIN index is used.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implement search service/repository using PostgreSQL full-text search",
+            "description": "Create a backend function that executes ranked full-text searches over Songs by title and artist, with pagination.",
+            "dependencies": [
+              "7.1"
+            ],
+            "details": "Implementation approach (Flask + SQLAlchemy):\n1) Add a function search_songs(q: str, limit: int = 20, offset: int = 0) -> list[Song], and optionally return a tuple (results, count_estimate) if you decide to include counts later.\n2) Build a tsquery with websearch_to_tsquery('simple', :q) to support AND/OR, quotes, and prefix via trailing '*'.\n3) Query pattern (SQLAlchemy pseudocode):\n   ts_query = func.websearch_to_tsquery('simple', bindparam('q'))\n   rank = func.ts_rank_cd(Song.search_vector, ts_query)\n   stmt = (\n     sa.select(Song, rank.label('rank'))\n       .where(Song.search_vector.op('@@')(ts_query))\n       .order_by(sa.desc(rank), Song.title.asc(), Song.id.asc())\n       .limit(sa.bindparam('limit'))\n       .offset(sa.bindparam('offset'))\n   )\n   Use bound params to prevent SQL injection.\n4) Enforce parameter caps: limit min=1, max=50; offset >= 0.\n5) Consider weighting already encoded in search_vector; rank with ts_rank_cd is sufficient. If you did not weight in the vector, pass weights to ts_rank_cd as needed.\n6) Return a lightweight DTO per song (id, title, artist, and optionally rank) for the API layer.",
+            "status": "pending",
+            "testStrategy": "Unit tests against a test DB: seed songs with overlapping words across title and artist to verify ranking (title-weighted > artist-weighted). Test: simple term, multi-term AND/OR, quoted phrases, trailing '*' for prefix. Verify pagination and deterministic ordering for ties.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Define API contract and validate request/response for song search",
+            "description": "Specify and validate the search endpoint contract, including required query parameter q and pagination parameters, with clear error handling.",
+            "dependencies": [
+              "7.2"
+            ],
+            "details": "Implementation approach:\n1) Endpoint: GET /songs/search\n2) Query parameters:\n   - q (required, string, 1..200 chars)\n   - limit (optional, int, default 20, 1..50)\n   - offset (optional, int, default 0, >=0)\n3) Response body (200):\n   {\n     \"results\": [{\"id\": ..., \"title\": \"...\", \"artist\": \"...\", \"rank\": 0.0}],\n     \"limit\": 20,\n     \"offset\": 0,\n     \"count\": null\n   }\n   Note: count can be omitted or null for simplicity; add later if needed.\n4) Errors:\n   - 400 for missing/empty q or invalid params (non-integer limit/offset, out of range)\n5) Validation: Use Marshmallow or Pydantic-like schema for parsing and validating query params; clamp/cap values; trim q; reject queries that are whitespace-only.\n6) Document in OpenAPI/Swagger (path, parameters, responses).",
+            "status": "pending",
+            "testStrategy": "Contract tests: validate 400 on invalid q, negative offset, excessive limit. Validate schema of 200 response. Include an OpenAPI validation step if available.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Implement GET /songs/search endpoint in Flask",
+            "description": "Create the Flask route/controller that validates input, invokes the search service, and returns JSON results.",
+            "dependencies": [
+              "7.3"
+            ],
+            "details": "Implementation approach:\n1) Add route in the songs blueprint/module: @bp.get('/songs/search').\n2) Parse and validate query params using the schema from 7.3. On validation error, return 400 with message and details.\n3) Call search_songs(q, limit, offset) from 7.2. Map returned rows to JSON objects (id, title, artist, optional rank rounded to 4 decimals).\n4) Return 200 JSON: {results, limit, offset}.\n5) Logging: log query terms and pagination (without PII). Add basic timing metrics to observe performance.\n6) Security/performance safeguards: enforce cap on limit, and short-circuit empty q. No authentication required unless product requires it; if auth is required later, add @jwt_required(optional=True) as needed without altering core logic.",
+            "status": "pending",
+            "testStrategy": "Integration tests with Flask test client: seed a few songs and hit /songs/search. Verify 200 path returns expected ordering, 400 on invalid input, pagination behavior, and absence of server errors. Optionally test JSON serialization and CORS headers if applicable.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "End-to-end search tests and performance smoke checks",
+            "description": "Verify correctness across realistic datasets and ensure the GIN index is used so queries remain fast.",
+            "dependencies": [
+              "7.4"
+            ],
+            "details": "Implementation approach:\n1) E2E tests (pytest): spin up a test Postgres with migrations applied. Seed 50–100 songs with diverse titles/artists.\n2) Correctness scenarios: search by exact title word, artist name, multi-word queries, quoted phrases, punctuation, case-insensitivity, prefix (provide trailing '*'). Validate that top results include expected songs and ranking is sensible.\n3) Pagination scenarios: limit/offset correctness and stable ordering across pages.\n4) Performance smoke: ensure cold query returns in <150 ms on test hardware and <30 ms warm (adjust thresholds per environment). Use EXPLAIN ANALYZE in a diagnostic test (not part of CI by default) to confirm GIN index usage.\n5) Regression harness: add tests for edge cases (empty results, very long q rejected, high Unicode).",
+            "status": "pending",
+            "testStrategy": "Run the test suite in CI against a Postgres service. Optionally collect EXPLAIN plans and log them for manual inspection. Use a seeded dataset to assert deterministic outcomes.",
+            "parentId": "undefined"
+          }
+        ]
+      },
+      {
+        "id": "8",
+        "title": "Core Song Display",
+        "description": "Develop the frontend component for displaying songs with basic chord/lyric formatting.",
+        "details": "Create a song display component that formats chords and lyrics. Ensure responsive design and compatibility across devices.",
+        "testStrategy": "Test display on different devices and screen sizes. Verify formatting accuracy and responsiveness.",
+        "priority": "medium",
+        "dependencies": [
+          "5",
+          "6"
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": "9",
+        "title": "User Preferences Management",
+        "description": "Implement storage and retrieval of user preferences for display settings.",
+        "details": "Create API endpoints to save and retrieve user preferences. Update the frontend to allow users to customize their display settings.",
+        "testStrategy": "Test preference changes and persistence across sessions. Verify API interactions and data consistency.",
+        "priority": "medium",
+        "dependencies": [
+          "4",
+          "5"
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": "10",
+        "title": "API Integration for Song Import",
+        "description": "Integrate with external APIs (Ultimate Guitar, Songsterr) for song import.",
+        "details": "Develop backend services to fetch and import songs from external APIs. Handle API authentication and rate limits.",
+        "testStrategy": "Test API integration with mock and live data. Validate imported data against source APIs.",
+        "priority": "medium",
+        "dependencies": [
+          "6",
+          "7"
+        ],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "lastModified": "2025-09-26T21:45:08.968Z",
+      "taskCount": 10,
+      "completedCount": 0,
+      "tags": [
+        "master"
+      ]
+    }
+  }
+}
