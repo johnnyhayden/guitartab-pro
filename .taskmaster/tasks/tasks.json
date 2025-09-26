@@ -28,10 +28,10 @@
             "description": "Establish a clear directory layout for frontend, backend, and project support assets to scaffold subsequent work.",
             "dependencies": [],
             "details": "- Create directories: mkdir -p frontend src placeholder if needed; mkdir -p backend; mkdir -p docs; mkdir -p scripts; mkdir -p .github/workflows\n- Add placeholder files so empty dirs are tracked: touch frontend/README.md backend/README.md docs/README.md scripts/README.md\n- Add an .editorconfig at repo root to enforce consistency (e.g., root=true; indent_size=2; end_of_line=lf; insert_final_newline=true)\n- Update README.md with a short directory layout section and contribution/getting started notes\n- Commit: git add . && git commit -m \"chore: scaffold base project structure\" && git push",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": "List files (e.g., tree -a -L 2 or ls -la) and verify directories exist and are tracked. Confirm README includes the structure overview.",
             "parentId": "undefined",
-            "updatedAt": "2025-09-26T21:56:18.836Z"
+            "updatedAt": "2025-09-26T21:57:26.904Z"
           },
           {
             "id": 3,
@@ -39,9 +39,10 @@
             "description": "Set up Node.js tooling for the frontend with npm, add minimal lint/format configuration, and create placeholder source structure.",
             "dependencies": [],
             "details": "- Ensure Node.js LTS is available (e.g., nvm install --lts && nvm use; echo \"$(node -v)\" > frontend/.nvmrc)\n- Initialize npm in frontend: cd frontend && npm init -y\n- Create src and entry file: mkdir -p src && echo \"console.log('frontend initialized');\" > src/index.js\n- Add lint/format tooling: npm install -D eslint prettier eslint-config-prettier eslint-plugin-import\n- Create .eslintrc.json:\n  { \"env\": {\"browser\": true, \"es2021\": true, \"node\": true}, \"extends\": [\"eslint:recommended\", \"prettier\"], \"parserOptions\": {\"ecmaVersion\": 2021, \"sourceType\": \"module\"}, \"rules\": {} }\n- Create .prettierrc: {}\n- Add npm scripts to package.json: \"scripts\": { \"lint\": \"eslint \\\"src/**/*.js\\\"\", \"format\": \"prettier --write \\\"src/**/*.{js,json,md}\\\"\", \"format:check\": \"prettier --check \\\"src/**/*.{js,json,md}\\\"\" }\n- Commit: git add . && git commit -m \"chore(frontend): initialize npm and lint/format configs\" && git push\n- Note: If using Yarn instead of npm, run yarn init -y and replace npm commands accordingly.",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": "From frontend/: run npm install to ensure dependencies install; run npm run lint and npm run format:check to confirm tooling works. Confirm src/index.js exists and no lint errors are reported.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-09-26T22:34:25.721Z"
           },
           {
             "id": 4,
@@ -124,7 +125,7 @@
             "parentId": "undefined"
           }
         ],
-        "updatedAt": "2025-09-26T21:56:18.836Z"
+        "updatedAt": "2025-09-26T22:34:25.721Z"
       },
       {
         "id": "2",
@@ -308,7 +309,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-09-26T21:56:18.838Z",
+      "lastModified": "2025-09-26T22:34:25.723Z",
       "taskCount": 10,
       "completedCount": 0,
       "tags": [
