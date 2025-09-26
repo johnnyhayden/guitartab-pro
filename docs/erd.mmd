@@ -1,0 +1,62 @@
+erDiagram
+    Users {
+        bigserial user_id PK
+        varchar username UK
+        varchar email UK
+        varchar password_hash
+        timestamp created_at
+        timestamp last_login
+    }
+
+    Songs {
+        bigserial song_id PK
+        varchar title
+        varchar artist
+        varchar genre
+        varchar key
+        integer tempo
+        integer difficulty_level
+        integer capo_position
+        text chord_progression
+        text lyrics
+        varchar source
+        varchar source_id
+        bigint created_by FK
+        timestamp created_at
+    }
+
+    Songlists {
+        bigserial songlist_id PK
+        varchar name
+        text description
+        bigint user_id FK
+        timestamp created_at
+        timestamp updated_at
+        boolean is_public
+    }
+
+    Songlist_Songs {
+        bigint songlist_id FK
+        bigint song_id FK
+        integer position
+        text notes
+        timestamp added_at
+    }
+
+    User_Preferences {
+        bigint user_id PK
+        varchar chord_color
+        varchar lyric_color
+        varchar background_color
+        varchar title_color
+        integer font_size
+        integer auto_scroll_speed
+        jsonb metronome_settings
+        varchar display_mode
+    }
+
+    Users ||--o{ Songs : "creates"
+    Users ||--o{ Songlists : "owns"
+    Users ||--|| User_Preferences : "has"
+    Songlists ||--o{ Songlist_Songs : "contains"
+    Songs ||--o{ Songlist_Songs : "included_in"

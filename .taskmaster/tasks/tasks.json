@@ -9,7 +9,7 @@
         "testStrategy": "Verify that the repository is accessible and the initial structure is correctly set up by cloning and running basic commands.",
         "priority": "medium",
         "dependencies": [],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -61,10 +61,10 @@
             "description": "Add repository-wide pre-commit hooks for basic hygiene and a CI workflow to verify installs for frontend and backend. Validate setup by cloning and running basic commands.",
             "dependencies": [],
             "details": "- Pre-commit setup (root):\n  - If using pipenv, install: cd backend && pipenv install --dev pre-commit && cd ..\n  - Create .pre-commit-config.yaml at repo root with hooks: trailing-whitespace, end-of-file-fixer, check-yaml, check-merge-conflict, mixed-line-ending; plus language-specific (optional): black, isort (repo: psf/black, PyCQA/isort), flake8; prettier (repo: pre-commit/mirrors-prettier, target frontend files)\n  - Install hooks: pre-commit install (run via pipenv: pipenv run pre-commit install from backend/ or use a global pre-commit install)\n- CI setup (GitHub Actions): create .github/workflows/ci.yml with two jobs on push/pull_request:\n  - frontend job: actions/setup-node@v4 (lts), working-directory: frontend, run: npm ci || npm install, then npm run lint and npm run format:check\n  - backend job: actions/setup-python@v5 (3.11), install pipenv, working-directory: backend, run: pipenv --python 3.11 && pipenv install --dev, then optional lint (pipenv run flake8)\n- Update README with CI status badge and local development instructions (frontend and backend basic commands)\n- Final validation by cloning fresh:\n  - In a separate directory: git clone <repo-url> fresh-clone && cd fresh-clone\n  - Run frontend check: cd frontend && npm install && npm run lint && cd ..\n  - Run backend check: cd backend && pipenv install --dev && pipenv run python src/app/main.py && cd ..\n  - Run pre-commit across repo: (from backend/) pipenv run pre-commit run --all-files",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": "Open a pull request to trigger CI and confirm both jobs pass. Locally, verify pre-commit blocks malformed changes. Validate a fresh clone can install and run the basic commands without errors.",
             "parentId": "undefined",
-            "updatedAt": "2025-09-26T22:39:30.435Z"
+            "updatedAt": "2025-09-26T22:42:28.341Z"
           },
           {
             "id": 6,
@@ -72,9 +72,10 @@
             "description": "Add standard ignore rules and text/line-ending normalization to ensure a clean, cross-platform repository.",
             "dependencies": [],
             "details": "Create a root-level .gitignore covering Python (.venv, venv, __pycache__, *.pyc, .pytest_cache, .mypy_cache, coverage/), Node (node_modules/, dist/, build/, .next/, coverage/), IDE/OS (.DS_Store, .idea/, .vscode/), env files (.env, .env.*), logs (*.log), and lockfiles as needed; add .gitattributes to enforce text eol=lf by default, mark common binaries (e.g., *.png, *.jpg, *.pdf) as binary, and set linguist settings if needed; add .editorconfig to standardize indentation (2 spaces for JS/TS/JSON/YAML, 4 spaces for Python), UTF-8, LF line endings, final newline, and trimming trailing whitespace.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run `git check-ignore -v` on representative files to confirm ignore coverage; stage files with `git add -A` and verify no unwanted artifacts are tracked; confirm line endings with `git ls-files --eol`; ensure editors pick up .editorconfig by saving sample files.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-09-26T22:42:47.863Z"
           },
           {
             "id": 7,
@@ -84,9 +85,10 @@
               "1.6"
             ],
             "details": "Add README.md with project overview, architecture layout (frontend/backend), quick start, and development scripts; choose and add LICENSE (e.g., MIT) and note year/owner; add CONTRIBUTING.md (branching strategy, Conventional Commits, code style, PR process), CODE_OF_CONDUCT.md, and SECURITY.md (vulnerability reporting); create CHANGELOG.md with Keep a Changelog format; add .github/ISSUE_TEMPLATE (bug_report.yml, feature_request.yml) and .github/PULL_REQUEST_TEMPLATE.md; include status badges placeholders for CI and coverage.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Preview README locally to verify sections render; run a markdown linter (e.g., markdownlint) to ensure formatting; check that GitHub recognizes the license and templates by attempting to open a new issue/PR; verify links with a link checker.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-09-26T22:42:54.330Z"
           },
           {
             "id": 8,
@@ -96,9 +98,10 @@
               "1.6"
             ],
             "details": "Add backend/.env.example (e.g., DATABASE_URL, JWT_SECRET, FLASK_ENV) and frontend/.env.example (e.g., VITE_API_BASE_URL or NEXT_PUBLIC_API_BASE_URL); add .nvmrc (Node 20.x) and .python-version (e.g., 3.11) for tooling consistency; create Makefile (or Taskfile) with targets: setup, backend.install, frontend.install, lint, format, test, run, clean; add scripts/bootstrap.sh (POSIX) and scripts/bootstrap.ps1 (Windows) to install Python env (virtualenv/pipenv), Node deps (npm ci or yarn install), and pre-commit; ensure package.json scripts exist for lint/test/build in frontend; commit lockfiles (Pipfile.lock/poetry.lock; package-lock.json/yarn.lock) if applicable.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "From a fresh clone, run the bootstrap or `make setup` and verify: Python env created, dependencies installed, Node deps installed, and pre-commit installed; copy .env.example to .env for both apps and confirm commands `make lint` and `make test` run without errors; confirm Node and Python versions via the files are honored.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-09-26T22:42:54.359Z"
           },
           {
             "id": 9,
@@ -109,9 +112,10 @@
               "1.8"
             ],
             "details": "Add .pre-commit-config.yaml with hooks: black, isort, ruff or flake8, trailing-whitespace, end-of-file-fixer, detect-secrets; configure pyproject.toml for black/isort/ruff settings; for frontend, add ESLint (.eslintrc) and Prettier (.prettierrc) with compatible rules; add npm scripts `lint`, `format`, and `lint:fix`; integrate commit message linting using @commitlint/config-conventional with a commit-msg hook (via pre-commit or Husky if needed); document usage in README; ensure CI can run the same checks.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run `pre-commit run --all-files` to validate hooks; introduce intentionally misformatted files and ensure hooks fail and auto-fix where applicable; attempt a commit with a non-conforming message and confirm it is blocked; run `npm run lint` and Python linters to verify no errors.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-09-26T22:42:54.375Z"
           },
           {
             "id": 10,
@@ -122,12 +126,13 @@
               "1.9"
             ],
             "details": "Create .github/workflows/backend.yml to set up Python (3.11), install deps (cache pip), run pre-commit, unit tests, and upload coverage (e.g., to Codecov) on push/pull_request; create frontend.yml to set up Node (20.x), install deps with npm ci (cache), run lint, tests, and build; define concurrency groups and required checks for main branch; add status badges to README; optionally add a workflow to validate PR titles against Conventional Commits.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Open a draft PR to trigger workflows and verify all jobs pass; inspect workflow logs for cache hits and coverage upload; test a failing lint or test to ensure CI blocks merges; enable branch protection requiring the CI checks to pass before merging.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-09-26T22:42:54.391Z"
           }
         ],
-        "updatedAt": "2025-09-26T22:39:30.435Z"
+        "updatedAt": "2025-09-26T22:42:54.391Z"
       },
       {
         "id": "2",
@@ -139,8 +144,115 @@
         "dependencies": [
           "1"
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "in-progress",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Requirements, ERD, and Naming Conventions",
+            "description": "Capture detailed requirements, model entities/relations, and define schema/naming conventions.",
+            "dependencies": [],
+            "details": "Scope: Users, Songs, Songlists, Songlist_Songs (junction with position), User_Preferences (1:1 with Users).\nKey attributes:\n- users: id (uuid), email (citext), display_name (text), created_at, updated_at\n- songs: id (uuid), title (text), artist (text), album (text), duration_seconds (int), metadata (jsonb), created_at, updated_at\n- songlists: id (uuid), owner_id (uuid), name (text), description (text), is_public (bool), created_at, updated_at\n- songlist_songs: id (uuid), songlist_id (uuid), song_id (uuid), position (int), added_at (timestamptz)\n- user_preferences: user_id (uuid pk), prefs (jsonb), updated_at\nConventions:\n- snake_case table/column names; singular table names: users, songs, songlists, songlist_songs, user_preferences\n- Constraint/index naming: pk_<table>, fk_<table>__<col>__<reftable>, uq_<table>__<cols>, ix_<table>__<cols>, ck_<table>__<name>\n- Timestamps: timestamptz with default now(); app-managed onupdate for updated_at\nDeliverables: ERD diagram (PNG/DBML), conventions doc, attribute/type matrix.\nAcceptance criteria (data integrity): ERD reflects exact relationships (1:N users->songlists; M:N songlists<->songs via junction; 1:1 users->user_preferences). All required attributes and nullability documented; naming conventions approved and referenced by migrations/ORM.",
+            "status": "in-progress",
+            "testStrategy": "",
+            "updatedAt": "2025-09-26T22:45:09.319Z",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Alembic Base Setup and Migration Strategy",
+            "description": "Initialize Alembic, configure metadata naming conventions, and define migration workflow.",
+            "dependencies": [
+              "2.1"
+            ],
+            "details": "Tasks:\n- alembic init, configure env.py to load SQLAlchemy Base.metadata with naming_convention\n- Enable required extensions via migration: CREATE EXTENSION IF NOT EXISTS pgcrypto; CREATE EXTENSION IF NOT EXISTS citext;\n- Strategy: one base schema revision (tables), followed by constraints/indexes if split is desired; always include downgrade paths\n- Autogenerate enabled; manual review required; migration IDs use message slugs\n- Envs: online/offline support; version_table schema default 'public'\nAcceptance criteria: alembic upgrade head and downgrade base succeed on fresh DB; naming_convention enforced; extensions created idempotently; CI job runs migrations without prompts.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Create Core Tables (DDL)",
+            "description": "Author DDL migrations for Users, Songs, Songlists, Songlist_Songs, and User_Preferences.",
+            "dependencies": [
+              "2.1",
+              "2.2"
+            ],
+            "details": "DDL (representative):\n- users: CREATE TABLE users (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), email citext NOT NULL, display_name text, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());\n- songs: CREATE TABLE songs (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), title text NOT NULL, artist text NOT NULL, album text, duration_seconds integer NOT NULL DEFAULT 0, metadata jsonb NOT NULL DEFAULT '{}'::jsonb, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());\n- songlists: CREATE TABLE songlists (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), owner_id uuid NOT NULL, name text NOT NULL, description text, is_public boolean NOT NULL DEFAULT false, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());\n- songlist_songs: CREATE TABLE songlist_songs (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), songlist_id uuid NOT NULL, song_id uuid NOT NULL, position integer NOT NULL, added_at timestamptz NOT NULL DEFAULT now());\n- user_preferences: CREATE TABLE user_preferences (user_id uuid PRIMARY KEY, prefs jsonb NOT NULL DEFAULT '{}'::jsonb, updated_at timestamptz NOT NULL DEFAULT now());\nAcceptance criteria (data integrity): All tables exist with columns and defaults as specified; no orphaned required columns left nullable; migration is reversible.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Constraints, Foreign Keys, and Cascade Rules",
+            "description": "Define FKs, uniqueness, and check constraints with appropriate ON DELETE behavior.",
+            "dependencies": [
+              "2.3"
+            ],
+            "details": "Constraints:\n- users: UNIQUE (email)\n- songs: CHECK (duration_seconds >= 0)\n- songlists: FK owner_id -> users(id) ON DELETE CASCADE\n- songlist_songs: FK songlist_id -> songlists(id) ON DELETE CASCADE; FK song_id -> songs(id) ON DELETE CASCADE; CHECK (position >= 1); UNIQUE (songlist_id, song_id); UNIQUE (songlist_id, position)\n- user_preferences: FK user_id -> users(id) ON DELETE CASCADE; enforce 1:1 via PK\nOptional email format check: CHECK (email ~* '^[^@]+@[^@]+\\.[^@]+$')\nAcceptance criteria (data integrity): Inserting duplicates for unique columns fails; invalid positions or negative durations fail; deleting a user cascades to songlists and preferences; deleting songlists removes junction rows; deleting a song removes its junction rows; downgrade removes constraints cleanly.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Indexes (Unique, Search, and Query-Driven)",
+            "description": "Create indexes to support uniqueness, filtering, and search patterns.",
+            "dependencies": [
+              "2.3",
+              "2.4"
+            ],
+            "details": "Indexes:\n- users: CREATE UNIQUE INDEX uq_users__email ON users(email);\n- songs: CREATE INDEX ix_songs__title_artist ON songs (title, artist); CREATE INDEX ix_songs__search ON songs USING GIN (to_tsvector('simple', coalesce(title,'') || ' ' || coalesce(artist,'')));\n- songlists: CREATE INDEX ix_songlists__owner_public ON songlists (owner_id, is_public);\n- songlist_songs: CREATE INDEX ix_songlist_songs__song_id ON songlist_songs (song_id); (uniques defined in constraints)\nAcceptance criteria (performance): EXPLAIN on typical queries uses indexes (btree or gin); uniqueness enforced by index; no duplicate overlapping indexes; downgrade drops indexes.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 6,
+            "title": "SQLAlchemy Models and Relationships (with Type Hints)",
+            "description": "Implement ORM models for all tables with relationships and typing.",
+            "dependencies": [
+              "2.3",
+              "2.4",
+              "2.5"
+            ],
+            "details": "Models (sketch):\n- Use Declarative with typing: from sqlalchemy.orm import Mapped, mapped_column, relationship\n- class User: id: Mapped[UUID]; email: Mapped[str]; display_name: Mapped[Optional[str]]; songlists: Mapped[list[Songlist]] = relationship(back_populates='owner', cascade='all, delete-orphan'); preferences: Mapped['UserPreferences'] = relationship(uselist=False, back_populates='user', cascade='all, delete-orphan')\n- class Song: id, title, artist, album, duration_seconds, metadata; songlists: Mapped[list['SonglistSong']] = relationship(back_populates='song', cascade='all, delete-orphan')\n- class Songlist: id, owner_id, name, ...; owner: relationship('User', back_populates='songlists'); items: Mapped[list['SonglistSong']] = relationship(back_populates='songlist', cascade='all, delete-orphan', order_by='SonglistSong.position')\n- class SonglistSong (association object): id, songlist_id, song_id, position, added_at; song: relationship('Song', back_populates='songlists'); songlist: relationship('Songlist', back_populates='items')\n- class UserPreferences: user_id PK, prefs (dict[str, Any]), updated_at; user: relationship('User', back_populates='preferences')\n- Configure __tablename__, indexes via __table_args__ to match naming_convention\nAcceptance criteria: ORM reflects DDL (columns, nullability, constraints). Relationship cascades align with FKs. Type hints pass mypy basic checks. SQLAlchemy can create and query relationships (add items with positions) without violating constraints.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 7,
+            "title": "Seed/Sample Data and Fixtures",
+            "description": "Provide seed script and test fixtures with realistic sample data.",
+            "dependencies": [
+              "2.3",
+              "2.6"
+            ],
+            "details": "Deliverables:\n- scripts/seed.py: inserts N users, M songs, K songlists; populates songlist_songs with unique (songlist_id, song_id) and sequential position; creates default user_preferences per user\n- Optional Alembic data revision for minimal bootstrap records (e.g., admin user)\n- Pytest fixtures: db_engine, db_session, seed_data factory for integration tests\nAcceptance criteria: Seed runs idempotently (clears or upserts as appropriate) in non-prod. All FKs and unique constraints satisfied. Basic queries return expected counts (e.g., each songlist has 5+ songs).",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 8,
+            "title": "Validation and Migration Tests (Upgrade/Downgrade) + Performance Smoke",
+            "description": "Write tests to validate schema integrity, migrations, and basic performance.",
+            "dependencies": [
+              "2.2",
+              "2.3",
+              "2.4",
+              "2.5",
+              "2.6",
+              "2.7"
+            ],
+            "details": "Tests:\n- Migration cycle: upgrade -> seed -> downgrade -> upgrade; verify no residual objects\n- Integrity: uniques (users.email), checks (position>=1, duration>=0), FKs/cascades (deleting user cascades songlists/preferences; deleting songlist removes junction rows)\n- ORM: create/read/update/delete via models, relationship loading and ordering by position\n- Search index smoke: EXPLAIN analyze on title/artist search shows GIN index usage\n- Performance: On sample dataset (e.g., 10k songs), typical queries under 50ms on dev machine; no sequential scans for indexed filters\nAcceptance criteria: All tests pass in CI. Upgrade and downgrade succeed. EXPLAIN plans show index usage. Data integrity enforced by constraints and ORM prevents invalid state.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          }
+        ],
+        "updatedAt": "2025-09-26T22:45:09.319Z"
       },
       {
         "id": "3",
@@ -311,9 +423,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-09-26T22:39:30.437Z",
+      "lastModified": "2025-09-26T22:45:09.321Z",
       "taskCount": 10,
-      "completedCount": 0,
+      "completedCount": 1,
       "tags": [
         "master"
       ]
