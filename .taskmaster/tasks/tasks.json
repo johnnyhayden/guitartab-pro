@@ -271,7 +271,7 @@
         "dependencies": [
           "2"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -279,8 +279,10 @@
             "description": "Define and document the core security configuration for JWT usage and token storage.",
             "dependencies": [],
             "details": "Decide and document:\n- JWT algorithm HS256 with a 256-bit SECRET_KEY from environment; include iss, sub, iat, nbf, exp, jti, and roles claims; 30s clock skew leeway.\n- Access token TTL: 15 minutes; Refresh token TTL: 7 days.\n- Refresh token rotation on every refresh; enable reuse detection and compromise response (revoke all existing refresh tokens for the user, require re-auth).\n- Token storage and transport: issue tokens in JSON response using Authorization: Bearer for clients; document guidance for web clients to prefer HttpOnly, Secure cookies if needed (server can optionally set cookies behind a flag).\n- Server-side revocation store: DB table for jti with indexes (user_id, jti, token_type, expires_at, revoked_at, reason); implement Flask-JWT-Extended callbacks to check revocation.\n- CORS and cookie settings: SameSite=Lax/Strict when cookies enabled, Secure and HttpOnly; restrict allowed origins.\nAcceptance Criteria:\n- A SECURITY.md and config module with the above decisions exist; all values configurable via env vars.\n- Tokens include jti and exp and are rejected when expired or revoked.\n- Storage strategy and rotation behavior are unambiguously specified for implementation and testing.",
-            "status": "pending",
-            "testStrategy": ""
+            "status": "done",
+            "testStrategy": "",
+            "updatedAt": "2025-09-26T22:55:26.967Z",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -290,8 +292,10 @@
               "3.1"
             ],
             "details": "Implement:\n- Password policy: min length 12; require uppercase, lowercase, digit, and special character; disallow email reuse; reject common passwords (use a lightweight top-10k list or zxcvbn score >= 3 if available).\n- Bcrypt configuration: bcrypt.gensalt(rounds=12) configurable via env; use constant-time comparisons; include per-hash salt from bcrypt.\n- Secure storage: store only bcrypt hashes; never store plaintext; ensure unique index on user email.\nAcceptance Criteria:\n- Creating a user stores a bcrypt hash (starts with $2) with configured cost.\n- Weak or common passwords are rejected with clear error messages.\n- Verification uses constant-time compare and passes unit tests.",
-            "status": "pending",
-            "testStrategy": ""
+            "status": "done",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-09-26T22:55:26.988Z"
           },
           {
             "id": 3,
@@ -302,8 +306,10 @@
               "3.2"
             ],
             "details": "Implement POST /auth/register:\n- Request: { email, password, display_name? } with schema validation; normalize and validate email format.\n- Enforce email uniqueness (conflict returns 409) and rate-limit registrations per IP.\n- Hash password with bcrypt; store created_at/updated_at; default role=user.\n- Response: 201 with minimal user info (id, email, created_at); do not auto-issue tokens.\nAcceptance Criteria:\n- Duplicate emails return 409; invalid input returns 400 with field errors.\n- DB stores only bcrypt hashes; no plaintext secrets in logs.\n- Endpoint covered by unit tests.",
-            "status": "pending",
-            "testStrategy": ""
+            "status": "done",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-09-26T22:55:27.002Z"
           },
           {
             "id": 4,
@@ -315,8 +321,10 @@
               "3.3"
             ],
             "details": "Implement POST /auth/login:\n- Request: { email, password }.\n- Rate limits: e.g., 5/min per IP and 10/hour per account; exponential backoff on repeated failures.\n- On success: issue access and refresh tokens per security decisions; include roles claim; return JSON { access_token, refresh_token, expires_in }.\n- On failure: return 401 with generic message; use constant-time checks; log suspicious activity.\nAcceptance Criteria:\n- Tokens contain jti, exp, sub, and roles; validate via Flask-JWT-Extended.\n- Rate limits enforced and tested; successful login returns 200 with both tokens.\n- No sensitive error leakage (e.g., user enumeration).",
-            "status": "pending",
-            "testStrategy": ""
+            "status": "done",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-09-26T22:55:27.015Z"
           },
           {
             "id": 5,
@@ -327,8 +335,10 @@
               "3.4"
             ],
             "details": "Implement:\n- POST /auth/refresh: requires valid refresh token; rotate refresh token; persist new refresh jti; revoke old one; detect reuse and mark session compromised (revoke all tokens for user) and respond 401.\n- POST /auth/logout: revoke current access and refresh tokens; optionally provide /auth/logout-all to revoke all user tokens.\n- Revocation callbacks: integrate with Flask-JWT-Extended to check jti against revocation store for both access and refresh tokens.\n- Index revocation table for performance and TTL cleanup job.\nAcceptance Criteria:\n- Old refresh tokens cannot be reused after rotation (tested).\n- After logout, access token is rejected on protected endpoints; reuse detection triggers compromise workflow.\n- Revocation checks run on every authenticated request.",
-            "status": "pending",
-            "testStrategy": ""
+            "status": "done",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-09-26T22:55:27.029Z"
           },
           {
             "id": 6,
@@ -340,8 +350,10 @@
               "3.3"
             ],
             "details": "Implement:\n- POST /auth/request-password-reset: accept email; respond 200 regardless of existence; generate single-use, time-bound reset token (store hashed token with user_id, expires_at, used_at); send via email adapter interface; rate-limit requests.\n- POST /auth/reset-password: verify token and expiration; enforce password policy; update bcrypt hash; invalidate all active tokens for the user; delete/mark used reset tokens.\n- POST /auth/change-password (auth required): verify current password; enforce policy; update hash; revoke all tokens (require re-login).\nAcceptance Criteria:\n- No account enumeration via responses or timing.\n- Reset tokens are single-use, short-lived (e.g., 1 hour), and stored hashed; all user tokens revoked after password change/reset.\n- Flow covered by tests, including token expiry and replay rejection.",
-            "status": "pending",
-            "testStrategy": ""
+            "status": "done",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-09-26T22:55:27.044Z"
           },
           {
             "id": 7,
@@ -352,8 +364,10 @@
               "3.3"
             ],
             "details": "Implement:\n- Extend user model to include role (e.g., user, admin) and optional custom claims field.\n- Inject roles claim into JWTs at issuance; add helper to refresh claims.\n- Provide @roles_required(['admin']) decorator and sample protected endpoint for demonstration.\nAcceptance Criteria:\n- Issued tokens contain roles claim; protected sample endpoint returns 403 for insufficient role and 200 for admin in tests.\n- Minimal migration and backfill strategy documented.",
-            "status": "pending",
-            "testStrategy": ""
+            "status": "done",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-09-26T22:55:27.442Z"
           },
           {
             "id": 8,
@@ -369,8 +383,10 @@
               "3.7"
             ],
             "details": "Implement tests with pytest and Flask test client:\n- Unit tests: validators, bcrypt hashing/verification, JWT claim contents, revocation lookup.\n- Integration tests: register/login/refresh/logout, rotation and reuse detection, password reset and change flows, role-protected routes, rate-limiting behavior (with time mocking), token expiry (freezegun).\n- Security checks: ensure no plaintext password storage, env-based secrets required, tokens rejected when expired/revoked, deny \"none\" algorithm.\n- Threat model checklist: enumerate key risks (token theft, fixation, replay, brute-force) and mitigation verification.\nAcceptance Criteria:\n- All tests pass in CI; coverage >= 85% for auth modules.\n- Explicit tests verify token issuance/validation and secure storage properties.",
-            "status": "pending",
-            "testStrategy": ""
+            "status": "done",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-09-26T22:55:27.462Z"
           },
           {
             "id": 9,
@@ -384,11 +400,13 @@
               "3.7"
             ],
             "details": "Deliverables:\n- OpenAPI/Swagger docs for /auth/register, /auth/login, /auth/refresh, /auth/logout, /auth/request-password-reset, /auth/reset-password, /auth/change-password.\n- Example flows (curl and Python) for registration, login, refresh rotation, logout-all, password reset, and role-protected access.\n- Token lifecycle diagram and guidance on storage (Authorization header vs HttpOnly cookies), error handling patterns, and rate-limit backoff.\n- Postman collection and README updates.\nAcceptance Criteria:\n- A developer can complete full auth flows using examples.\n- Docs clearly state token issuance/validation expectations and secure storage recommendations.",
-            "status": "pending",
-            "testStrategy": ""
+            "status": "done",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-09-26T22:55:27.482Z"
           }
         ],
-        "updatedAt": "2025-09-26T22:51:46.733Z"
+        "updatedAt": "2025-09-26T22:55:27.482Z"
       },
       {
         "id": 4,
@@ -400,8 +418,99 @@
         "dependencies": [
           "3"
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "in-progress",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Application factory and environment-based configuration",
+            "description": "Implement create_app with env-specific config and register core extensions.",
+            "dependencies": [],
+            "details": "Scope:\n- Add app factory: create_app(env=None) selecting DevelopmentConfig, TestingConfig, ProductionConfig via APP_ENV/FLASK_ENV.\n- Configure: SECRET_KEY, SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS=False, JWT_SECRET_KEY (from Task 3), JSON_SORT_KEYS=False, PROPAGATE_EXCEPTIONS=True, default pagination limits.\n- Initialize extensions: SQLAlchemy, Marshmallow, Flask-Migrate, CORS, logging (structured with request-id), and optionally JWT (do not enforce auth yet).\n- Set API base prefix '/api/v1'; add simple '/api/health' endpoint.\nDeliverables:\n- config.py with config classes; app/__init__.py with create_app; extensions.py for initialized instances; .env.example.\nAcceptance Criteria:\n- create_app returns a Flask app with correct env config (TestingConfig uses in-memory SQLite and TESTING=True).\n- App boots and GET /api/health returns 200 JSON {\"status\":\"ok\"}.\n- Extensions are registered without runtime errors; URL prefixing works for '/api/v1/*'.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Blueprints for users and songs with routing conventions",
+            "description": "Define versioned blueprints and RESTful routes for users and songs.",
+            "dependencies": [
+              "4.1"
+            ],
+            "details": "Scope:\n- Create blueprints: users_bp (prefix '/api/v1/users'), songs_bp (prefix '/api/v1/songs').\n- Define CRUD routes: GET '' (list), POST '' (create), GET '<int:id>' (retrieve), PUT/PATCH '<int:id>' (update), DELETE '<int:id>' (delete).\n- Establish route names (e.g., users.list_users) and consistent ID param naming ('user_id', 'song_id').\n- Register blueprints in create_app; provide temporary stub handlers returning JSON placeholders until CRUD is implemented in Subtask 4.7.\nDeliverables:\n- app/users/routes.py and app/songs/routes.py with route stubs and registration wiring.\n- Routing conventions doc (versioning, nouns, no verbs, plural resources).\nAcceptance Criteria:\n- URL map includes all listed routes under '/api/v1'.\n- Temporary stub responses return 200 JSON {\"status\":\"stub\"} for list/get and 501 for unimplemented mutations (to be finalized in Subtask 4.7).",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Global error handlers with RFC 7807 problem+json responses",
+            "description": "Centralize error handling and standardize JSON error contract.",
+            "dependencies": [
+              "4.1"
+            ],
+            "details": "Scope:\n- Implement error handlers for: HTTPException (use code), Marshmallow ValidationError (422), SQLAlchemy IntegrityError (409), NotFound (404), generic Exception (500).\n- Response format: application/problem+json with fields: type (URI), title, status, detail, instance (request path), correlation_id, and errors (field-level issues map) when applicable.\n- Add request ID middleware (X-Request-ID; generate if missing) and include in logs and error responses.\n- Map unknown routes to 404 problem+json.\nDeliverables:\n- app/errors.py with handler registrations; middleware to attach correlation_id; documentation of error contract with examples.\nAcceptance Criteria:\n- Any raised HTTPException returns application/problem+json with correct status and headers.\n- Validation errors produce 422 with errors map; IntegrityError returns 409 with conflict detail.\n- Responses include correlation_id and instance; content-type is application/problem+json.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Input validation schemas and response models",
+            "description": "Create Marshmallow schemas for users/songs and decorators to validate/serialize.",
+            "dependencies": [
+              "4.1",
+              "4.2",
+              "4.3"
+            ],
+            "details": "Scope:\n- Schemas: UserCreate(email, username, password), UserUpdate(optional fields), UserOut(id, email, username, created_at); SongCreate(title, artist, tuning?, difficulty?), SongUpdate, SongOut(id, title, artist, created_at).\n- Constraints: email format, username [a-z0-9_]{3,30}, password length>=8, title required; coerce/strip strings.\n- List envelope schema: { items: [...], meta: { page, per_page, total, pages, sort, order } }.\n- Implement decorators/helpers: validate_request(schema) -> parsed data on g; serialize_response(schema or envelope) -> consistent output.\n- Ensure sensitive fields (password) never serialized in responses.\nDeliverables:\n- app/schemas/user.py, app/schemas/song.py; app/utils/validation.py decorators; schema docs.\nAcceptance Criteria:\n- Invalid payloads yield 422 problem+json with field-level errors; valid payloads pass data to handlers.\n- Successful responses conform to output schemas; no password or sensitive data in any response.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Pagination and sorting utilities",
+            "description": "Implement reusable helpers for page/per_page and sorting with validation.",
+            "dependencies": [
+              "4.1",
+              "4.2",
+              "4.3",
+              "4.4"
+            ],
+            "details": "Scope:\n- Helper parse_pagination(args, defaults): supports page>=1, per_page [1..100], defaults from config.\n- Sorting: parse_sort(args, allowed_fields) supporting 'sort' and 'order' or a '-field' syntax; validate allowed fields per resource.\n- SQLAlchemy integration: apply_pagination(query) returning items and total; build Link header (first, prev, next, last) and meta object.\n- Validation errors surface via problem+json (422) with clear messages; unknown sort fields rejected.\nDeliverables:\n- app/utils/pagination.py with parsing, SQLAlchemy helpers, and header/meta builders; usage examples in docstrings.\nAcceptance Criteria:\n- GET list endpoints can pass page/per_page/sort/order to helpers and receive consistent meta and Link headers.\n- Invalid pagination/sort inputs return 422 problem+json with errors map; defaults apply when params omitted.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "OpenAPI/Swagger documentation with CI validation",
+            "description": "Generate and serve OpenAPI spec and validate it in CI.",
+            "dependencies": [
+              "4.1",
+              "4.2",
+              "4.3",
+              "4.4",
+              "4.5"
+            ],
+            "details": "Scope:\n- Define OpenAPI 3.0 spec (openapi.yaml/json) using apispec + Marshmallow schemas; include servers, tags (Users, Songs), components/schemas, and shared Problem+JSON error schema.\n- Annotate routes with operationIds, parameters (pagination/sort), request bodies, and standardized responses (200, 201 with Location, 204, 400/422/404/409 via problem+json).\n- Serve /api/openapi.json and Swagger UI at /api/docs.\n- CI: add job to validate spec with openapi-spec-validator and Spectral lint; fail build on errors.\nDeliverables:\n- docs/openapi.yaml; app/docs.py serving spec and docs; CI workflow config (e.g., .github/workflows/openapi-validate.yml).\nAcceptance Criteria:\n- GET /api/openapi.json returns a valid spec; Swagger UI loads with no console errors.\n- CI validation passes on main and PRs; error responses documented consistently across endpoints.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Test harness (pytest fixtures, client) and minimal CRUD skeletons",
+            "description": "Add pytest setup and implement minimal working CRUD for users and songs.",
+            "dependencies": [
+              "4.1",
+              "4.2",
+              "4.3",
+              "4.4",
+              "4.5",
+              "4.6"
+            ],
+            "details": "Scope:\n- Pytest setup: conftest.py with app(), client(), db() fixtures using TestingConfig; factory for sample users/songs; transactional test isolation.\n- Implement CRUD handlers using SQLAlchemy models (from Task 2) + schemas + pagination utilities:\n  - Users: POST create (201, Location), GET list (200 + meta + Link), GET by id (200/404), PATCH/PUT update (200/404), DELETE (204/404). Exclude password from responses.\n  - Songs: same pattern; define allowed sort fields.\n- Negative cases: validation 422, conflict 409 on unique constraints, not found 404, bad pagination/sort 422; all errors follow problem+json contract.\n- Optional: protect write operations with JWT (Task 3) behind a feature flag; tests can run without auth.\n- Coverage and run scripts.\nDeliverables:\n- Implemented route handlers replacing stubs; tests under tests/api/test_users.py and tests/api/test_songs.py; coverage config (>=80%).\nAcceptance Criteria:\n- All tests pass locally and in CI; coverage >=80% for app package.\n- Endpoints behavior:\n  - Create returns 201 with Location header pointing to resource URI and body matching *Out schema.\n  - List returns 200 with items[] and meta; Link header present when applicable.\n  - Get returns 200 with resource or 404 problem+json if missing.\n  - Update returns 200 with updated resource; partial updates accepted for PATCH.\n  - Delete returns 204 with empty body.\n- Error contract: application/problem+json with fields {type,title,status,detail,instance,correlation_id,errors?} for all error responses.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ],
+        "updatedAt": "2025-09-26T22:55:36.049Z"
       },
       {
         "id": 5,
@@ -546,13 +655,13 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-09-26T22:51:46.735Z",
+      "lastModified": "2025-09-26T22:55:36.051Z",
       "taskCount": 10,
-      "completedCount": 2,
+      "completedCount": 3,
       "tags": [
         "master"
       ],
-      "created": "2025-09-26T22:51:50.832Z",
+      "created": "2025-09-26T22:55:40.099Z",
       "description": "Tasks for master context"
     }
   }

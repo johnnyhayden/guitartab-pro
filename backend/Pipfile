@@ -12,6 +12,10 @@ flask-jwt-extended = "*"
 bcrypt = "*"
 python-dotenv = "*"
 marshmallow = "*"
+flask-cors = "*"
+flask-restx = "*"
+pytest = "*"
+pytest-flask = "*"
 
 [dev-packages]
 black = "*"
