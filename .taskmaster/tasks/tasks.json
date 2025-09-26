@@ -152,9 +152,9 @@
             "description": "Capture detailed requirements, model entities/relations, and define schema/naming conventions.",
             "dependencies": [],
             "details": "Scope: Users, Songs, Songlists, Songlist_Songs (junction with position), User_Preferences (1:1 with Users).\nKey attributes:\n- users: id (uuid), email (citext), display_name (text), created_at, updated_at\n- songs: id (uuid), title (text), artist (text), album (text), duration_seconds (int), metadata (jsonb), created_at, updated_at\n- songlists: id (uuid), owner_id (uuid), name (text), description (text), is_public (bool), created_at, updated_at\n- songlist_songs: id (uuid), songlist_id (uuid), song_id (uuid), position (int), added_at (timestamptz)\n- user_preferences: user_id (uuid pk), prefs (jsonb), updated_at\nConventions:\n- snake_case table/column names; singular table names: users, songs, songlists, songlist_songs, user_preferences\n- Constraint/index naming: pk_<table>, fk_<table>__<col>__<reftable>, uq_<table>__<cols>, ix_<table>__<cols>, ck_<table>__<name>\n- Timestamps: timestamptz with default now(); app-managed onupdate for updated_at\nDeliverables: ERD diagram (PNG/DBML), conventions doc, attribute/type matrix.\nAcceptance criteria (data integrity): ERD reflects exact relationships (1:N users->songlists; M:N songlists<->songs via junction; 1:1 users->user_preferences). All required attributes and nullability documented; naming conventions approved and referenced by migrations/ORM.",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": "",
-            "updatedAt": "2025-09-26T22:45:09.319Z",
+            "updatedAt": "2025-09-26T22:46:19.543Z",
             "parentId": "undefined"
           },
           {
@@ -165,9 +165,10 @@
               "2.1"
             ],
             "details": "Tasks:\n- alembic init, configure env.py to load SQLAlchemy Base.metadata with naming_convention\n- Enable required extensions via migration: CREATE EXTENSION IF NOT EXISTS pgcrypto; CREATE EXTENSION IF NOT EXISTS citext;\n- Strategy: one base schema revision (tables), followed by constraints/indexes if split is desired; always include downgrade paths\n- Autogenerate enabled; manual review required; migration IDs use message slugs\n- Envs: online/offline support; version_table schema default 'public'\nAcceptance criteria: alembic upgrade head and downgrade base succeed on fresh DB; naming_convention enforced; extensions created idempotently; CI job runs migrations without prompts.",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": "",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-09-26T22:46:24.004Z"
           },
           {
             "id": 3,
@@ -252,7 +253,7 @@
             "parentId": "undefined"
           }
         ],
-        "updatedAt": "2025-09-26T22:45:09.319Z"
+        "updatedAt": "2025-09-26T22:46:24.004Z"
       },
       {
         "id": "3",
@@ -423,7 +424,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-09-26T22:45:09.321Z",
+      "lastModified": "2025-09-26T22:46:24.006Z",
       "taskCount": 10,
       "completedCount": 1,
       "tags": [

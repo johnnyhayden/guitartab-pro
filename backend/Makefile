@@ -1,4 +1,4 @@
-.PHONY: install fmt lint test clean help
+.PHONY: install fmt lint test clean help db-init db-drop db-migrate db-upgrade db-downgrade
 
 # Default target
 help:
@@ -9,6 +9,11 @@ help:
 	@echo "  test       - Run tests"
 	@echo "  clean      - Clean up temporary files"
 	@echo "  shell      - Activate pipenv shell"
+	@echo "  db-init    - Initialize database tables"
+	@echo "  db-drop    - Drop all database tables"
+	@echo "  db-migrate - Create new migration"
+	@echo "  db-upgrade - Upgrade database to latest migration"
+	@echo "  db-downgrade - Downgrade database by one migration"
 
 # Install dependencies
 install:
@@ -36,3 +41,20 @@ clean:
 # Activate pipenv shell
 shell:
 	pipenv shell
+
+# Database commands
+db-init:
+	python scripts/migrate.py init
+
+db-drop:
+	python scripts/migrate.py drop
+
+db-migrate:
+	@read -p "Enter migration message: " msg; \
+	python scripts/migrate.py create "$$msg"
+
+db-upgrade:
+	python scripts/migrate.py upgrade
+
+db-downgrade:
+	python scripts/migrate.py downgrade
