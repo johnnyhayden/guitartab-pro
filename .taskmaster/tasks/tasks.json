@@ -50,10 +50,10 @@
             "description": "Set up Python virtual environment with pipenv for the backend and create a minimal backend scaffolding.",
             "dependencies": [],
             "details": "- Ensure Python 3.11+ is available (e.g., pyenv install 3.11.x && pyenv local 3.11.x in backend/ if using pyenv)\n- Initialize pipenv in backend: cd backend && pipenv --python 3.11\n- Optionally add dev tools: pipenv install --dev black flake8 isort\n- Create basic structure: mkdir -p src/app && touch src/app/__init__.py && echo \"print('backend initialized')\" > src/app/main.py\n- Create config files (optional but recommended):\n  - .flake8 with basic rules (e.g., [flake8] max-line-length = 100; extend-ignore = E203,W503)\n  - pyproject.toml for Black/isort configuration (e.g., [tool.black] line-length = 100; [tool.isort] profile = \"black\")\n  - .env.example with placeholders (e.g., FLASK_ENV=development; DATABASE_URL=postgresql://user:pass@localhost:5432/db)\n- Add basic Makefile in backend/ with recipes: install (pipenv install --dev), fmt (pipenv run black . && pipenv run isort .), lint (pipenv run flake8)\n- Commit: git add . && git commit -m \"chore(backend): initialize pipenv and baseline structure\" && git push",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": "From backend/: run pipenv run python src/app/main.py and verify output. If dev tools installed, run pipenv run black --version and pipenv run flake8 to confirm they execute.",
             "parentId": "undefined",
-            "updatedAt": "2025-09-26T22:36:09.201Z"
+            "updatedAt": "2025-09-26T22:39:19.178Z"
           },
           {
             "id": 5,
@@ -61,9 +61,10 @@
             "description": "Add repository-wide pre-commit hooks for basic hygiene and a CI workflow to verify installs for frontend and backend. Validate setup by cloning and running basic commands.",
             "dependencies": [],
             "details": "- Pre-commit setup (root):\n  - If using pipenv, install: cd backend && pipenv install --dev pre-commit && cd ..\n  - Create .pre-commit-config.yaml at repo root with hooks: trailing-whitespace, end-of-file-fixer, check-yaml, check-merge-conflict, mixed-line-ending; plus language-specific (optional): black, isort (repo: psf/black, PyCQA/isort), flake8; prettier (repo: pre-commit/mirrors-prettier, target frontend files)\n  - Install hooks: pre-commit install (run via pipenv: pipenv run pre-commit install from backend/ or use a global pre-commit install)\n- CI setup (GitHub Actions): create .github/workflows/ci.yml with two jobs on push/pull_request:\n  - frontend job: actions/setup-node@v4 (lts), working-directory: frontend, run: npm ci || npm install, then npm run lint and npm run format:check\n  - backend job: actions/setup-python@v5 (3.11), install pipenv, working-directory: backend, run: pipenv --python 3.11 && pipenv install --dev, then optional lint (pipenv run flake8)\n- Update README with CI status badge and local development instructions (frontend and backend basic commands)\n- Final validation by cloning fresh:\n  - In a separate directory: git clone <repo-url> fresh-clone && cd fresh-clone\n  - Run frontend check: cd frontend && npm install && npm run lint && cd ..\n  - Run backend check: cd backend && pipenv install --dev && pipenv run python src/app/main.py && cd ..\n  - Run pre-commit across repo: (from backend/) pipenv run pre-commit run --all-files",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": "Open a pull request to trigger CI and confirm both jobs pass. Locally, verify pre-commit blocks malformed changes. Validate a fresh clone can install and run the basic commands without errors.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-09-26T22:39:30.435Z"
           },
           {
             "id": 6,
@@ -126,7 +127,7 @@
             "parentId": "undefined"
           }
         ],
-        "updatedAt": "2025-09-26T22:36:09.201Z"
+        "updatedAt": "2025-09-26T22:39:30.435Z"
       },
       {
         "id": "2",
@@ -310,7 +311,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-09-26T22:36:09.203Z",
+      "lastModified": "2025-09-26T22:39:30.437Z",
       "taskCount": 10,
       "completedCount": 0,
       "tags": [
