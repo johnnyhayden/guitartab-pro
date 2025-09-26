@@ -11,12 +11,48 @@ GuitarTab Pro solves the problem of managing and organizing guitar tabs, chord c
 ```
 guitartab-pro/
 ├── frontend/          # React/Vue.js frontend application
+│   ├── src/           # Source code
+│   ├── public/        # Static assets
+│   ├── components/    # React/Vue components
+│   └── styles/        # CSS/SCSS files
 ├── backend/           # Python Flask API server
+│   ├── src/           # Source code
+│   │   ├── app/       # Flask application
+│   │   ├── models/    # Database models
+│   │   ├── routes/    # API routes
+│   │   └── utils/     # Utility functions
+│   ├── tests/         # Test files
+│   └── requirements/  # Python dependencies
 ├── docs/              # Project documentation
+│   ├── api/           # API documentation
+│   ├── user-guides/   # User documentation
+│   └── dev-guides/    # Development guides
 ├── scripts/           # Build and utility scripts
+│   └── PRD.txt        # Product Requirements Document
 ├── .github/           # GitHub workflows and templates
+│   └── workflows/     # CI/CD workflows
 └── .taskmaster/       # Task Master project management
+    ├── tasks/         # Task definitions
+    ├── reports/       # Analysis reports
+    └── templates/     # PRD templates
 ```
+
+## Getting Started
+
+This project is currently in development. See the Task Master task list for current progress and next steps.
+
+### Prerequisites
+
+- Node.js (LTS version)
+- Python 3.11+
+- PostgreSQL 12+
+- Git
+
+### Development Setup
+
+1. Clone the repository: `git clone https://github.com/johnnyhayden/guitartab-pro.git`
+2. Navigate to the project directory: `cd guitartab-pro`
+3. Follow the Task Master workflow for development tasks
 
 ## Features
 

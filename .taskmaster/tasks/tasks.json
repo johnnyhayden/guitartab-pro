@@ -17,10 +17,10 @@
             "description": "Create the project root, initialize a Git repository with main branch, add baseline files (.gitignore, README, LICENSE), create/connect a remote repository, make the initial commit, and push.",
             "dependencies": [],
             "details": "- Create project directory and initialize Git: mkdir <project-name> && cd <project-name> && git init -b main\n- Create baseline files:\n  - README.md: include project name, summary, and high-level structure goals\n  - LICENSE: choose MIT or appropriate license\n  - .gitignore: include common Node, Python, and OS ignores (e.g., node_modules/, dist/, build/, .venv/, __pycache__/, .DS_Store, .env, .pytest_cache/)\n  - .gitattributes: text=auto eol=lf (optional)\n- Create and connect remote repo:\n  - Using GitHub CLI: gh repo create <org-or-user>/<repo> --public --source=. --remote=origin --push\n  - Or create manually on hosting provider, then: git remote add origin git@github.com:<org-or-user>/<repo>.git\n- First commit and push: git add . && git commit -m \"chore: initial repository setup\" && git push -u origin main\n- Configure repository settings (optional): default branch main, protect main branch, require PR reviews.",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": "Run git remote -v to confirm remote connection. Visit the remote host to verify the repository exists and initial files are present. Optionally git clone <repo-url> ../tmp-clone and verify contents.",
             "parentId": "undefined",
-            "updatedAt": "2025-09-26T21:45:08.967Z"
+            "updatedAt": "2025-09-26T21:55:32.307Z"
           },
           {
             "id": 2,
@@ -28,9 +28,10 @@
             "description": "Establish a clear directory layout for frontend, backend, and project support assets to scaffold subsequent work.",
             "dependencies": [],
             "details": "- Create directories: mkdir -p frontend src placeholder if needed; mkdir -p backend; mkdir -p docs; mkdir -p scripts; mkdir -p .github/workflows\n- Add placeholder files so empty dirs are tracked: touch frontend/README.md backend/README.md docs/README.md scripts/README.md\n- Add an .editorconfig at repo root to enforce consistency (e.g., root=true; indent_size=2; end_of_line=lf; insert_final_newline=true)\n- Update README.md with a short directory layout section and contribution/getting started notes\n- Commit: git add . && git commit -m \"chore: scaffold base project structure\" && git push",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": "List files (e.g., tree -a -L 2 or ls -la) and verify directories exist and are tracked. Confirm README includes the structure overview.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-09-26T21:56:18.836Z"
           },
           {
             "id": 3,
@@ -123,7 +124,7 @@
             "parentId": "undefined"
           }
         ],
-        "updatedAt": "2025-09-26T21:45:08.967Z"
+        "updatedAt": "2025-09-26T21:56:18.836Z"
       },
       {
         "id": "2",
@@ -307,7 +308,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-09-26T21:45:08.968Z",
+      "lastModified": "2025-09-26T21:56:18.838Z",
       "taskCount": 10,
       "completedCount": 0,
       "tags": [
