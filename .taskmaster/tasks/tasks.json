@@ -165,10 +165,10 @@
               "2.1"
             ],
             "details": "Tasks:\n- alembic init, configure env.py to load SQLAlchemy Base.metadata with naming_convention\n- Enable required extensions via migration: CREATE EXTENSION IF NOT EXISTS pgcrypto; CREATE EXTENSION IF NOT EXISTS citext;\n- Strategy: one base schema revision (tables), followed by constraints/indexes if split is desired; always include downgrade paths\n- Autogenerate enabled; manual review required; migration IDs use message slugs\n- Envs: online/offline support; version_table schema default 'public'\nAcceptance criteria: alembic upgrade head and downgrade base succeed on fresh DB; naming_convention enforced; extensions created idempotently; CI job runs migrations without prompts.",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": "",
             "parentId": "undefined",
-            "updatedAt": "2025-09-26T22:46:24.004Z"
+            "updatedAt": "2025-09-26T22:49:09.777Z"
           },
           {
             "id": 3,
@@ -179,9 +179,10 @@
               "2.2"
             ],
             "details": "DDL (representative):\n- users: CREATE TABLE users (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), email citext NOT NULL, display_name text, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());\n- songs: CREATE TABLE songs (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), title text NOT NULL, artist text NOT NULL, album text, duration_seconds integer NOT NULL DEFAULT 0, metadata jsonb NOT NULL DEFAULT '{}'::jsonb, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());\n- songlists: CREATE TABLE songlists (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), owner_id uuid NOT NULL, name text NOT NULL, description text, is_public boolean NOT NULL DEFAULT false, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());\n- songlist_songs: CREATE TABLE songlist_songs (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), songlist_id uuid NOT NULL, song_id uuid NOT NULL, position integer NOT NULL, added_at timestamptz NOT NULL DEFAULT now());\n- user_preferences: CREATE TABLE user_preferences (user_id uuid PRIMARY KEY, prefs jsonb NOT NULL DEFAULT '{}'::jsonb, updated_at timestamptz NOT NULL DEFAULT now());\nAcceptance criteria (data integrity): All tables exist with columns and defaults as specified; no orphaned required columns left nullable; migration is reversible.",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": "",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-09-26T22:49:13.596Z"
           },
           {
             "id": 4,
@@ -253,7 +254,7 @@
             "parentId": "undefined"
           }
         ],
-        "updatedAt": "2025-09-26T22:46:24.004Z"
+        "updatedAt": "2025-09-26T22:49:13.596Z"
       },
       {
         "id": "3",
@@ -424,7 +425,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-09-26T22:46:24.006Z",
+      "lastModified": "2025-09-26T22:49:13.598Z",
       "taskCount": 10,
       "completedCount": 1,
       "tags": [

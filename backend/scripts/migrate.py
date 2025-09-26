@@ -35,7 +35,10 @@ def drop_db():
 def create_migration(message: str):
     """Create a new migration."""
     print(f"Creating migration: {message}")
-    return run_alembic_command(f'revision --autogenerate -m "{message}"')
+    return subprocess.run(
+        ["pipenv", "run", "alembic", "revision", "--autogenerate", "-m", message],
+        cwd=Path(__file__).parent.parent,
+    ).returncode
 
 
 def upgrade_db(revision: str = "head"):
