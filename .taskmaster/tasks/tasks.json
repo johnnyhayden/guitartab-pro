@@ -2,7 +2,7 @@
   "master": {
     "tasks": [
       {
-        "id": "1",
+        "id": 1,
         "title": "Setup Project Repository",
         "description": "Initialize the project repository with version control and basic project structure.",
         "details": "Create a new Git repository for the project. Set up the basic directory structure for frontend and backend components. Initialize package managers for frontend (npm/yarn) and backend (pipenv/virtualenv).",
@@ -135,7 +135,7 @@
         "updatedAt": "2025-09-26T22:42:54.391Z"
       },
       {
-        "id": "2",
+        "id": 2,
         "title": "Database Schema Design",
         "description": "Design and implement the PostgreSQL database schema for users, songs, and songlists.",
         "details": "Create tables for Users, Songs, Songlists, Songlist_Songs, and User_Preferences. Define primary keys, foreign keys, and necessary indexes. Use SQLAlchemy for ORM mapping in the backend.",
@@ -144,7 +144,7 @@
         "dependencies": [
           "1"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -179,10 +179,10 @@
               "2.2"
             ],
             "details": "DDL (representative):\n- users: CREATE TABLE users (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), email citext NOT NULL, display_name text, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());\n- songs: CREATE TABLE songs (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), title text NOT NULL, artist text NOT NULL, album text, duration_seconds integer NOT NULL DEFAULT 0, metadata jsonb NOT NULL DEFAULT '{}'::jsonb, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());\n- songlists: CREATE TABLE songlists (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), owner_id uuid NOT NULL, name text NOT NULL, description text, is_public boolean NOT NULL DEFAULT false, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());\n- songlist_songs: CREATE TABLE songlist_songs (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), songlist_id uuid NOT NULL, song_id uuid NOT NULL, position integer NOT NULL, added_at timestamptz NOT NULL DEFAULT now());\n- user_preferences: CREATE TABLE user_preferences (user_id uuid PRIMARY KEY, prefs jsonb NOT NULL DEFAULT '{}'::jsonb, updated_at timestamptz NOT NULL DEFAULT now());\nAcceptance criteria (data integrity): All tables exist with columns and defaults as specified; no orphaned required columns left nullable; migration is reversible.",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": "",
             "parentId": "undefined",
-            "updatedAt": "2025-09-26T22:49:13.596Z"
+            "updatedAt": "2025-09-26T22:51:38.757Z"
           },
           {
             "id": 4,
@@ -192,9 +192,10 @@
               "2.3"
             ],
             "details": "Constraints:\n- users: UNIQUE (email)\n- songs: CHECK (duration_seconds >= 0)\n- songlists: FK owner_id -> users(id) ON DELETE CASCADE\n- songlist_songs: FK songlist_id -> songlists(id) ON DELETE CASCADE; FK song_id -> songs(id) ON DELETE CASCADE; CHECK (position >= 1); UNIQUE (songlist_id, song_id); UNIQUE (songlist_id, position)\n- user_preferences: FK user_id -> users(id) ON DELETE CASCADE; enforce 1:1 via PK\nOptional email format check: CHECK (email ~* '^[^@]+@[^@]+\\.[^@]+$')\nAcceptance criteria (data integrity): Inserting duplicates for unique columns fails; invalid positions or negative durations fail; deleting a user cascades to songlists and preferences; deleting songlists removes junction rows; deleting a song removes its junction rows; downgrade removes constraints cleanly.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-09-26T22:51:38.792Z"
           },
           {
             "id": 5,
@@ -205,9 +206,10 @@
               "2.4"
             ],
             "details": "Indexes:\n- users: CREATE UNIQUE INDEX uq_users__email ON users(email);\n- songs: CREATE INDEX ix_songs__title_artist ON songs (title, artist); CREATE INDEX ix_songs__search ON songs USING GIN (to_tsvector('simple', coalesce(title,'') || ' ' || coalesce(artist,'')));\n- songlists: CREATE INDEX ix_songlists__owner_public ON songlists (owner_id, is_public);\n- songlist_songs: CREATE INDEX ix_songlist_songs__song_id ON songlist_songs (song_id); (uniques defined in constraints)\nAcceptance criteria (performance): EXPLAIN on typical queries uses indexes (btree or gin); uniqueness enforced by index; no duplicate overlapping indexes; downgrade drops indexes.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-09-26T22:51:38.807Z"
           },
           {
             "id": 6,
@@ -219,9 +221,10 @@
               "2.5"
             ],
             "details": "Models (sketch):\n- Use Declarative with typing: from sqlalchemy.orm import Mapped, mapped_column, relationship\n- class User: id: Mapped[UUID]; email: Mapped[str]; display_name: Mapped[Optional[str]]; songlists: Mapped[list[Songlist]] = relationship(back_populates='owner', cascade='all, delete-orphan'); preferences: Mapped['UserPreferences'] = relationship(uselist=False, back_populates='user', cascade='all, delete-orphan')\n- class Song: id, title, artist, album, duration_seconds, metadata; songlists: Mapped[list['SonglistSong']] = relationship(back_populates='song', cascade='all, delete-orphan')\n- class Songlist: id, owner_id, name, ...; owner: relationship('User', back_populates='songlists'); items: Mapped[list['SonglistSong']] = relationship(back_populates='songlist', cascade='all, delete-orphan', order_by='SonglistSong.position')\n- class SonglistSong (association object): id, songlist_id, song_id, position, added_at; song: relationship('Song', back_populates='songlists'); songlist: relationship('Songlist', back_populates='items')\n- class UserPreferences: user_id PK, prefs (dict[str, Any]), updated_at; user: relationship('User', back_populates='preferences')\n- Configure __tablename__, indexes via __table_args__ to match naming_convention\nAcceptance criteria: ORM reflects DDL (columns, nullability, constraints). Relationship cascades align with FKs. Type hints pass mypy basic checks. SQLAlchemy can create and query relationships (add items with positions) without violating constraints.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-09-26T22:51:38.822Z"
           },
           {
             "id": 7,
@@ -232,9 +235,10 @@
               "2.6"
             ],
             "details": "Deliverables:\n- scripts/seed.py: inserts N users, M songs, K songlists; populates songlist_songs with unique (songlist_id, song_id) and sequential position; creates default user_preferences per user\n- Optional Alembic data revision for minimal bootstrap records (e.g., admin user)\n- Pytest fixtures: db_engine, db_session, seed_data factory for integration tests\nAcceptance criteria: Seed runs idempotently (clears or upserts as appropriate) in non-prod. All FKs and unique constraints satisfied. Basic queries return expected counts (e.g., each songlist has 5+ songs).",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-09-26T22:51:38.839Z"
           },
           {
             "id": 8,
@@ -249,15 +253,16 @@
               "2.7"
             ],
             "details": "Tests:\n- Migration cycle: upgrade -> seed -> downgrade -> upgrade; verify no residual objects\n- Integrity: uniques (users.email), checks (position>=1, duration>=0), FKs/cascades (deleting user cascades songlists/preferences; deleting songlist removes junction rows)\n- ORM: create/read/update/delete via models, relationship loading and ordering by position\n- Search index smoke: EXPLAIN analyze on title/artist search shows GIN index usage\n- Performance: On sample dataset (e.g., 10k songs), typical queries under 50ms on dev machine; no sequential scans for indexed filters\nAcceptance criteria: All tests pass in CI. Upgrade and downgrade succeed. EXPLAIN plans show index usage. Data integrity enforced by constraints and ORM prevents invalid state.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-09-26T22:51:38.859Z"
           }
         ],
-        "updatedAt": "2025-09-26T22:49:13.596Z"
+        "updatedAt": "2025-09-26T22:51:38.859Z"
       },
       {
-        "id": "3",
+        "id": 3,
         "title": "User Authentication System",
         "description": "Implement JWT-based user authentication with secure password handling.",
         "details": "Use Flask-JWT-Extended for JWT handling and bcrypt for password hashing. Implement registration, login, and password reset endpoints. Store user credentials securely in the database.",
@@ -266,11 +271,127 @@
         "dependencies": [
           "2"
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "in-progress",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Security decisions: JWT lifetimes, rotation, and storage strategy",
+            "description": "Define and document the core security configuration for JWT usage and token storage.",
+            "dependencies": [],
+            "details": "Decide and document:\n- JWT algorithm HS256 with a 256-bit SECRET_KEY from environment; include iss, sub, iat, nbf, exp, jti, and roles claims; 30s clock skew leeway.\n- Access token TTL: 15 minutes; Refresh token TTL: 7 days.\n- Refresh token rotation on every refresh; enable reuse detection and compromise response (revoke all existing refresh tokens for the user, require re-auth).\n- Token storage and transport: issue tokens in JSON response using Authorization: Bearer for clients; document guidance for web clients to prefer HttpOnly, Secure cookies if needed (server can optionally set cookies behind a flag).\n- Server-side revocation store: DB table for jti with indexes (user_id, jti, token_type, expires_at, revoked_at, reason); implement Flask-JWT-Extended callbacks to check revocation.\n- CORS and cookie settings: SameSite=Lax/Strict when cookies enabled, Secure and HttpOnly; restrict allowed origins.\nAcceptance Criteria:\n- A SECURITY.md and config module with the above decisions exist; all values configurable via env vars.\n- Tokens include jti and exp and are rejected when expired or revoked.\n- Storage strategy and rotation behavior are unambiguously specified for implementation and testing.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Password policy and bcrypt configuration",
+            "description": "Define password requirements and configure bcrypt hashing parameters.",
+            "dependencies": [
+              "3.1"
+            ],
+            "details": "Implement:\n- Password policy: min length 12; require uppercase, lowercase, digit, and special character; disallow email reuse; reject common passwords (use a lightweight top-10k list or zxcvbn score >= 3 if available).\n- Bcrypt configuration: bcrypt.gensalt(rounds=12) configurable via env; use constant-time comparisons; include per-hash salt from bcrypt.\n- Secure storage: store only bcrypt hashes; never store plaintext; ensure unique index on user email.\nAcceptance Criteria:\n- Creating a user stores a bcrypt hash (starts with $2) with configured cost.\n- Weak or common passwords are rejected with clear error messages.\n- Verification uses constant-time compare and passes unit tests.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Registration endpoint with email uniqueness and validation",
+            "description": "Implement /auth/register with input validation and secure password handling.",
+            "dependencies": [
+              "3.1",
+              "3.2"
+            ],
+            "details": "Implement POST /auth/register:\n- Request: { email, password, display_name? } with schema validation; normalize and validate email format.\n- Enforce email uniqueness (conflict returns 409) and rate-limit registrations per IP.\n- Hash password with bcrypt; store created_at/updated_at; default role=user.\n- Response: 201 with minimal user info (id, email, created_at); do not auto-issue tokens.\nAcceptance Criteria:\n- Duplicate emails return 409; invalid input returns 400 with field errors.\n- DB stores only bcrypt hashes; no plaintext secrets in logs.\n- Endpoint covered by unit tests.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Login endpoint with throttling/rate limiting and token issuance",
+            "description": "Implement /auth/login with credential verification, rate limits, and JWT issuance.",
+            "dependencies": [
+              "3.1",
+              "3.2",
+              "3.3"
+            ],
+            "details": "Implement POST /auth/login:\n- Request: { email, password }.\n- Rate limits: e.g., 5/min per IP and 10/hour per account; exponential backoff on repeated failures.\n- On success: issue access and refresh tokens per security decisions; include roles claim; return JSON { access_token, refresh_token, expires_in }.\n- On failure: return 401 with generic message; use constant-time checks; log suspicious activity.\nAcceptance Criteria:\n- Tokens contain jti, exp, sub, and roles; validate via Flask-JWT-Extended.\n- Rate limits enforced and tested; successful login returns 200 with both tokens.\n- No sensitive error leakage (e.g., user enumeration).",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Refresh, logout, and token revocation strategy implementation",
+            "description": "Implement /auth/refresh, /auth/logout, and revocation checks with refresh rotation and reuse detection.",
+            "dependencies": [
+              "3.1",
+              "3.4"
+            ],
+            "details": "Implement:\n- POST /auth/refresh: requires valid refresh token; rotate refresh token; persist new refresh jti; revoke old one; detect reuse and mark session compromised (revoke all tokens for user) and respond 401.\n- POST /auth/logout: revoke current access and refresh tokens; optionally provide /auth/logout-all to revoke all user tokens.\n- Revocation callbacks: integrate with Flask-JWT-Extended to check jti against revocation store for both access and refresh tokens.\n- Index revocation table for performance and TTL cleanup job.\nAcceptance Criteria:\n- Old refresh tokens cannot be reused after rotation (tested).\n- After logout, access token is rejected on protected endpoints; reuse detection triggers compromise workflow.\n- Revocation checks run on every authenticated request.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Password reset flow (email adapter) and change password endpoint",
+            "description": "Implement secure password reset via emailed token and authenticated password change.",
+            "dependencies": [
+              "3.1",
+              "3.2",
+              "3.3"
+            ],
+            "details": "Implement:\n- POST /auth/request-password-reset: accept email; respond 200 regardless of existence; generate single-use, time-bound reset token (store hashed token with user_id, expires_at, used_at); send via email adapter interface; rate-limit requests.\n- POST /auth/reset-password: verify token and expiration; enforce password policy; update bcrypt hash; invalidate all active tokens for the user; delete/mark used reset tokens.\n- POST /auth/change-password (auth required): verify current password; enforce policy; update hash; revoke all tokens (require re-login).\nAcceptance Criteria:\n- No account enumeration via responses or timing.\n- Reset tokens are single-use, short-lived (e.g., 1 hour), and stored hashed; all user tokens revoked after password change/reset.\n- Flow covered by tests, including token expiry and replay rejection.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Role and claims scaffolding for future authorization",
+            "description": "Add role storage and include claims in JWTs, plus basic decorators for role checks.",
+            "dependencies": [
+              "3.1",
+              "3.3"
+            ],
+            "details": "Implement:\n- Extend user model to include role (e.g., user, admin) and optional custom claims field.\n- Inject roles claim into JWTs at issuance; add helper to refresh claims.\n- Provide @roles_required(['admin']) decorator and sample protected endpoint for demonstration.\nAcceptance Criteria:\n- Issued tokens contain roles claim; protected sample endpoint returns 403 for insufficient role and 200 for admin in tests.\n- Minimal migration and backfill strategy documented.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 8,
+            "title": "Tests: unit, integration, and threat-model checks",
+            "description": "Comprehensive tests covering endpoints, token lifecycle, storage security, and abuse cases.",
+            "dependencies": [
+              "3.1",
+              "3.2",
+              "3.3",
+              "3.4",
+              "3.5",
+              "3.6",
+              "3.7"
+            ],
+            "details": "Implement tests with pytest and Flask test client:\n- Unit tests: validators, bcrypt hashing/verification, JWT claim contents, revocation lookup.\n- Integration tests: register/login/refresh/logout, rotation and reuse detection, password reset and change flows, role-protected routes, rate-limiting behavior (with time mocking), token expiry (freezegun).\n- Security checks: ensure no plaintext password storage, env-based secrets required, tokens rejected when expired/revoked, deny \"none\" algorithm.\n- Threat model checklist: enumerate key risks (token theft, fixation, replay, brute-force) and mitigation verification.\nAcceptance Criteria:\n- All tests pass in CI; coverage >= 85% for auth modules.\n- Explicit tests verify token issuance/validation and secure storage properties.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 9,
+            "title": "Documentation and client usage examples",
+            "description": "Produce API docs, examples, and guidance for secure client token handling.",
+            "dependencies": [
+              "3.3",
+              "3.4",
+              "3.5",
+              "3.6",
+              "3.7"
+            ],
+            "details": "Deliverables:\n- OpenAPI/Swagger docs for /auth/register, /auth/login, /auth/refresh, /auth/logout, /auth/request-password-reset, /auth/reset-password, /auth/change-password.\n- Example flows (curl and Python) for registration, login, refresh rotation, logout-all, password reset, and role-protected access.\n- Token lifecycle diagram and guidance on storage (Authorization header vs HttpOnly cookies), error handling patterns, and rate-limit backoff.\n- Postman collection and README updates.\nAcceptance Criteria:\n- A developer can complete full auth flows using examples.\n- Docs clearly state token issuance/validation expectations and secure storage recommendations.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ],
+        "updatedAt": "2025-09-26T22:51:46.733Z"
       },
       {
-        "id": "4",
+        "id": 4,
         "title": "Basic Flask API Setup",
         "description": "Set up the core REST API endpoints for user and song management.",
         "details": "Create a Flask application with endpoints for CRUD operations on users and songs. Implement basic error handling and input validation.",
@@ -283,7 +404,7 @@
         "subtasks": []
       },
       {
-        "id": "5",
+        "id": 5,
         "title": "Frontend Framework Initialization",
         "description": "Initialize the frontend using a modern JavaScript framework (Vue.js or React).",
         "details": "Set up a new project using Vue CLI or Create React App. Configure routing and state management (Vuex or Redux). Implement a basic responsive layout.",
@@ -296,7 +417,7 @@
         "subtasks": []
       },
       {
-        "id": "6",
+        "id": 6,
         "title": "Song CRUD Operations",
         "description": "Implement create, read, update, and delete operations for songs in the backend.",
         "details": "Develop API endpoints for song CRUD operations. Ensure proper validation and error handling. Integrate with the database using SQLAlchemy.",
@@ -309,7 +430,7 @@
         "subtasks": []
       },
       {
-        "id": "7",
+        "id": 7,
         "title": "Basic Search Functionality",
         "description": "Implement simple text-based search for songs by title and artist.",
         "details": "Use PostgreSQL full-text search capabilities to implement search functionality. Create API endpoints to handle search queries.",
@@ -381,7 +502,7 @@
         ]
       },
       {
-        "id": "8",
+        "id": 8,
         "title": "Core Song Display",
         "description": "Develop the frontend component for displaying songs with basic chord/lyric formatting.",
         "details": "Create a song display component that formats chords and lyrics. Ensure responsive design and compatibility across devices.",
@@ -395,7 +516,7 @@
         "subtasks": []
       },
       {
-        "id": "9",
+        "id": 9,
         "title": "User Preferences Management",
         "description": "Implement storage and retrieval of user preferences for display settings.",
         "details": "Create API endpoints to save and retrieve user preferences. Update the frontend to allow users to customize their display settings.",
@@ -409,7 +530,7 @@
         "subtasks": []
       },
       {
-        "id": "10",
+        "id": 10,
         "title": "API Integration for Song Import",
         "description": "Integrate with external APIs (Ultimate Guitar, Songsterr) for song import.",
         "details": "Develop backend services to fetch and import songs from external APIs. Handle API authentication and rate limits.",
@@ -425,12 +546,14 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-09-26T22:49:13.598Z",
+      "lastModified": "2025-09-26T22:51:46.735Z",
       "taskCount": 10,
-      "completedCount": 1,
+      "completedCount": 2,
       "tags": [
         "master"
-      ]
+      ],
+      "created": "2025-09-26T22:51:50.832Z",
+      "description": "Tasks for master context"
     }
   }
 }
