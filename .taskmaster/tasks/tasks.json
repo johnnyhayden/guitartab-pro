@@ -39,10 +39,10 @@
             "description": "Set up Node.js tooling for the frontend with npm, add minimal lint/format configuration, and create placeholder source structure.",
             "dependencies": [],
             "details": "- Ensure Node.js LTS is available (e.g., nvm install --lts && nvm use; echo \"$(node -v)\" > frontend/.nvmrc)\n- Initialize npm in frontend: cd frontend && npm init -y\n- Create src and entry file: mkdir -p src && echo \"console.log('frontend initialized');\" > src/index.js\n- Add lint/format tooling: npm install -D eslint prettier eslint-config-prettier eslint-plugin-import\n- Create .eslintrc.json:\n  { \"env\": {\"browser\": true, \"es2021\": true, \"node\": true}, \"extends\": [\"eslint:recommended\", \"prettier\"], \"parserOptions\": {\"ecmaVersion\": 2021, \"sourceType\": \"module\"}, \"rules\": {} }\n- Create .prettierrc: {}\n- Add npm scripts to package.json: \"scripts\": { \"lint\": \"eslint \\\"src/**/*.js\\\"\", \"format\": \"prettier --write \\\"src/**/*.{js,json,md}\\\"\", \"format:check\": \"prettier --check \\\"src/**/*.{js,json,md}\\\"\" }\n- Commit: git add . && git commit -m \"chore(frontend): initialize npm and lint/format configs\" && git push\n- Note: If using Yarn instead of npm, run yarn init -y and replace npm commands accordingly.",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": "From frontend/: run npm install to ensure dependencies install; run npm run lint and npm run format:check to confirm tooling works. Confirm src/index.js exists and no lint errors are reported.",
             "parentId": "undefined",
-            "updatedAt": "2025-09-26T22:34:25.721Z"
+            "updatedAt": "2025-09-26T22:36:01.821Z"
           },
           {
             "id": 4,
@@ -50,9 +50,10 @@
             "description": "Set up Python virtual environment with pipenv for the backend and create a minimal backend scaffolding.",
             "dependencies": [],
             "details": "- Ensure Python 3.11+ is available (e.g., pyenv install 3.11.x && pyenv local 3.11.x in backend/ if using pyenv)\n- Initialize pipenv in backend: cd backend && pipenv --python 3.11\n- Optionally add dev tools: pipenv install --dev black flake8 isort\n- Create basic structure: mkdir -p src/app && touch src/app/__init__.py && echo \"print('backend initialized')\" > src/app/main.py\n- Create config files (optional but recommended):\n  - .flake8 with basic rules (e.g., [flake8] max-line-length = 100; extend-ignore = E203,W503)\n  - pyproject.toml for Black/isort configuration (e.g., [tool.black] line-length = 100; [tool.isort] profile = \"black\")\n  - .env.example with placeholders (e.g., FLASK_ENV=development; DATABASE_URL=postgresql://user:pass@localhost:5432/db)\n- Add basic Makefile in backend/ with recipes: install (pipenv install --dev), fmt (pipenv run black . && pipenv run isort .), lint (pipenv run flake8)\n- Commit: git add . && git commit -m \"chore(backend): initialize pipenv and baseline structure\" && git push",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": "From backend/: run pipenv run python src/app/main.py and verify output. If dev tools installed, run pipenv run black --version and pipenv run flake8 to confirm they execute.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-09-26T22:36:09.201Z"
           },
           {
             "id": 5,
@@ -125,7 +126,7 @@
             "parentId": "undefined"
           }
         ],
-        "updatedAt": "2025-09-26T22:34:25.721Z"
+        "updatedAt": "2025-09-26T22:36:09.201Z"
       },
       {
         "id": "2",
@@ -309,7 +310,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-09-26T22:34:25.723Z",
+      "lastModified": "2025-09-26T22:36:09.203Z",
       "taskCount": 10,
       "completedCount": 0,
       "tags": [
