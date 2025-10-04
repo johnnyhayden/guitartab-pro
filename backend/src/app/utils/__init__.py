@@ -1,1 +1,1 @@
-"""Utility modules for GuitarTab Pro application."""
+"""Utils package for GuitarTab Pro application."""

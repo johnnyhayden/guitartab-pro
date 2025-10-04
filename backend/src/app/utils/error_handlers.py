@@ -1,121 +1,98 @@
-"""Error handlers for Flask application."""
+"""Global error handlers for the Flask application."""
 
 from flask import Flask, jsonify, request
-from marshmallow import ValidationError
-from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from werkzeug.exceptions import HTTPException
+from pydantic import ValidationError as PydanticValidationError
+from marshmallow import ValidationError as MarshmallowValidationError
+
+from .exceptions import APIException
 
 
-def register_error_handlers(app: Flask) -> None:
-    """Register error handlers for the Flask application."""
-    
-    @app.errorhandler(400)
-    def bad_request(error):
-        """Handle 400 Bad Request errors."""
-        return jsonify({
-            "type": "https://tools.ietf.org/html/rfc7231#section-6.5.1",
-            "title": "Bad Request",
-            "status": 400,
-            "detail": str(error.description) if hasattr(error, 'description') else "Bad request",
-            "instance": request.url
-        }), 400
-    
-    @app.errorhandler(401)
-    def unauthorized(error):
-        """Handle 401 Unauthorized errors."""
-        return jsonify({
-            "type": "https://tools.ietf.org/html/rfc7235#section-3.1",
-            "title": "Unauthorized",
-            "status": 401,
-            "detail": str(error.description) if hasattr(error, 'description') else "Authentication required",
-            "instance": request.url
-        }), 401
-    
-    @app.errorhandler(403)
-    def forbidden(error):
-        """Handle 403 Forbidden errors."""
-        return jsonify({
-            "type": "https://tools.ietf.org/html/rfc7231#section-6.5.3",
-            "title": "Forbidden",
-            "status": 403,
-            "detail": str(error.description) if hasattr(error, 'description') else "Access forbidden",
-            "instance": request.url
-        }), 403
-    
-    @app.errorhandler(404)
-    def not_found(error):
-        """Handle 404 Not Found errors."""
-        return jsonify({
-            "type": "https://tools.ietf.org/html/rfc7231#section-6.5.4",
-            "title": "Not Found",
-            "status": 404,
-            "detail": str(error.description) if hasattr(error, 'description') else "Resource not found",
-            "instance": request.url
-        }), 404
-    
-    @app.errorhandler(422)
-    def unprocessable_entity(error):
-        """Handle 422 Unprocessable Entity errors."""
-        return jsonify({
-            "type": "https://tools.ietf.org/html/rfc4918#section-11.2",
-            "title": "Unprocessable Entity",
+def register_error_handlers(app: Flask):
+    """Register common error handlers for the Flask application."""
+
+    @app.errorhandler(APIException)
+    def handle_api_exception(e):
+        """Handle custom API exceptions."""
+        response = jsonify({
+            "status": e.status_code,
+            "title": e.__class__.__name__,
+            "detail": e.detail,
+            "code": e.code,
+            "type": f"about:blank?type={e.status_code}",
+        })
+        response.status_code = e.status_code
+        return response
+
+    @app.errorhandler(PydanticValidationError)
+    def handle_pydantic_validation_error(e):
+        """Handle Pydantic validation errors."""
+        response = jsonify({
             "status": 422,
-            "detail": str(error.description) if hasattr(error, 'description') else "Unprocessable entity",
-            "instance": request.url
-        }), 422
-    
-    @app.errorhandler(500)
-    def internal_server_error(error):
-        """Handle 500 Internal Server Error."""
-        return jsonify({
-            "type": "https://tools.ietf.org/html/rfc7231#section-6.6.1",
-            "title": "Internal Server Error",
-            "status": 500,
-            "detail": "An internal server error occurred",
-            "instance": request.url
-        }), 500
-    
-    @app.errorhandler(ValidationError)
-    def validation_error(error):
-        """Handle Marshmallow validation errors."""
-        return jsonify({
-            "type": "https://tools.ietf.org/html/rfc4918#section-11.2",
             "title": "Validation Error",
-            "status": 422,
             "detail": "Input validation failed",
-            "errors": error.messages,
-            "instance": request.url
-        }), 422
-    
-    @app.errorhandler(IntegrityError)
-    def integrity_error(error):
-        """Handle database integrity errors."""
-        return jsonify({
-            "type": "https://tools.ietf.org/html/rfc4918#section-11.2",
-            "title": "Database Integrity Error",
+            "code": "validation_error",
+            "type": "about:blank?type=422",
+            "errors": e.errors(),
+            "body": e.model._get_model_dump() if hasattr(e, 'model') else None,
+        })
+        response.status_code = 422
+        return response
+
+    @app.errorhandler(MarshmallowValidationError)
+    def handle_marshmallow_validation_error(e):
+        """Handle Marshmallow validation errors."""
+        response = jsonify({
             "status": 422,
-            "detail": "Database constraint violation",
-            "instance": request.url
-        }), 422
-    
-    @app.errorhandler(SQLAlchemyError)
-    def database_error(error):
-        """Handle general database errors."""
-        return jsonify({
-            "type": "https://tools.ietf.org/html/rfc7231#section-6.6.1",
-            "title": "Database Error",
-            "status": 500,
-            "detail": "A database error occurred",
-            "instance": request.url
-        }), 500
-    
+            "title": "Validation Error", 
+            "detail": "Input validation failed",
+            "code": "validation_error",
+            "type": "about:blank?type=422",
+            "errors": e.messages,
+        })
+        response.status_code = 422
+        return response
+
     @app.errorhandler(HTTPException)
-    def http_exception(error):
-        """Handle HTTP exceptions."""
-        return jsonify({
-            "type": "https://tools.ietf.org/html/rfc7231#section-6.5",
-            "title": error.name,
-            "status": error.code,
-            "detail": error.description,
-            "instance": request.url
-        }), error.code
+    def handle_http_exception(e):
+        """Handle HTTP exceptions (e.g., 404, 500)."""
+        response = e.get_response()
+        if response is not None:
+            # If the exception already has a response, use it
+            return response
+
+        # For other HTTP exceptions, create a JSON response
+        response = jsonify(
+            {
+                "status": e.code,
+                "title": e.name,
+                "detail": e.description,
+                "type": f"about:blank?type={e.code}",
+            }
+        )
+        response.status_code = e.code
+        return response
+
+    @app.errorhandler(Exception)
+    def handle_generic_exception(e):
+        """Handle generic exceptions (e.g., unhandled errors)."""
+        app.logger.error(f"An unhandled exception occurred: {e}", exc_info=True)
+        
+        # Log additional context for debugging
+        if request:
+            app.logger.error(f"Request URL: {request.url}")
+            app.logger.error(f"Request Method: {request.method}")
+            app.logger.error(f"Request Headers: {dict(request.headers)}")
+            if request.is_json:
+                app.logger.error(f"Request JSON: {request.get_json()}")
+        
+        response = jsonify(
+            {
+                "status": 500,
+                "title": "Internal Server Error",
+                "detail": "An unexpected error occurred.",
+                "type": "about:blank?type=500",
+            }
+        )
+        response.status_code = 500
+        return response
