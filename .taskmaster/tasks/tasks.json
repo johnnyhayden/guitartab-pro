@@ -788,10 +788,11 @@
               "6.3",
               "6.4"
             ],
-            "details": "Auth model and rules:\n- Authentication: use JWT; user extracted from token; assume user.is_admin boolean is available.\n- Create: authenticated users only; owner_id set to current user id.\n- Read single: public songs accessible to anyone; private songs (is_public=false) only to owner or admin -> otherwise 403.\n- List: anonymous users see only public songs; authenticated users by default see public songs; support scope filter: mine (only their songs), public (only is_public=true), all (admin only, else 403).\n- Update/Delete: only owner or admin may modify/delete; enforce both at endpoint decorator/middleware and in service layer.\nImplementation:\n- Authorization decorator/util (e.g., can_manage_song) and checks inside service methods as defense in depth.\n- Ensure forbidden reasons are mapped to 403 via error handler.\nAcceptance criteria:\n- Unauthorized access to protected endpoints returns 401; insufficient privileges return 403.\n- Owners can update/delete their songs; non-owners cannot.\n- Admin can manage any song.\n- List endpoint enforces scope semantics as specified.",
-            "status": "pending",
+            "details": "Auth model and rules:\n- Authentication: use JWT; user extracted from token; assume user.is_admin boolean is available.\n- Create: authenticated users only; owner_id set to current user id.\n- Read single: public songs accessible to anyone; private songs (is_public=false) only to owner or admin -> otherwise 403.\n- List: anonymous users see only public songs; authenticated users by default see public songs; support scope filter: mine (only their songs), public (only is_public=true), all (admin only, else 403).\n- Update/Delete: only owner or admin may modify/delete; enforce both at endpoint decorator/middleware and in service layer.\nImplementation:\n- Authorization decorator/util (e.g., can_manage_song) and checks inside service methods as defense in depth.\n- Ensure forbidden reasons are mapped to 403 via error handler.\nAcceptance criteria:\n- Unauthorized access to protected endpoints returns 401; insufficient privileges return 403.\n- Owners can update/delete their songs; non-owners cannot.\n- Admin can manage any song.\n- List endpoint enforces scope semantics as specified.\n<info added on 2025-10-04T14:13:31.066Z>\nEnhanced authorization implementation and integrations:\n- Added auth_decorators.py with AuthorizationManager and decorators/utilities: require_auth, require_owner, require_admin, require_permission, require_role, ResourceProtector, SongProtector. Applied to all song endpoints and admin routes; service layer mirrors checks for defense in depth.\n- Extended user model with role (user/moderator/admin), is_active/is_admin/is_moderator flags, permissions JSON, profile fields (bio, avatar_url, website_url), and helpers: has_role(), has_permission(), can_read/write/delete_resource(), update_role(), add_permission(), remove_permission(). Admins inherit all permissions; role-based defaults provided.\n- Extended song model with is_public, is_featured, is_flagged, flagged_reason, moderated_by, moderated_at, rating_count, and helpers: can_be_viewed_by(), can_be_edited_by(), can_be_deleted_by(), flag_song(), unflag_song(), make_public(), set_featured().\n- Introduced admin.py routes (admin only unless noted): /admin/users (list with pagination/filtering), /admin/users/{id}/role, /admin/users/{id}/activate, /admin/users/{id}/stats, /admin/users/{id}/promote, /admin/system/stats, /admin/moderation (moderation queue; moderators with moderate_songs permission or admins).\n- Enhanced songs.py routing with role/permission-aware access: per-song visibility filtering; owner_or_admin resource protection for write operations; new endpoints /songs/moderation (flagged songs; moderators/admins) and /songs/{id}/feature (admin only). Anonymous users see only public, unflagged songs; moderators see flagged content for review.\n- Created user_service.py for admin operations: role and permission management, account activation/deactivation, user statistics aggregation; all operations gated by admin or required permissions.\n- Added security audit logging for authorization decisions and admin/moderation actions.\n\nAdditional acceptance criteria:\n- Moderators with moderate_songs can list/review flagged songs and update moderation state; other users receive 403.\n- Admin-only routes require admin role; all admin actions are logged.\n- Scope filtering on list: mine (owner only), public (is_public=true), all (admin only). Flagged items are excluded from public/mine results unless user has moderate_songs.\n- Song visibility: public songs visible to everyone; private or flagged songs require owner, admin, or appropriate permission; failures return 403.\n- All protected endpoints require valid JWT; missing/invalid tokens return 401; permission/role failures return 403.\n</info added on 2025-10-04T14:13:31.066Z>",
+            "status": "done",
             "testStrategy": "",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-04T14:13:34.614Z"
           },
           {
             "id": 7,
@@ -811,7 +812,7 @@
             "parentId": "undefined"
           }
         ],
-        "updatedAt": "2025-10-04T14:07:09.051Z"
+        "updatedAt": "2025-10-04T14:13:34.614Z"
       },
       {
         "id": "7",
@@ -930,7 +931,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-04T14:07:09.052Z",
+      "lastModified": "2025-10-04T14:13:34.621Z",
       "taskCount": 10,
       "completedCount": 5,
       "tags": [

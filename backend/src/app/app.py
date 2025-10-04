@@ -11,6 +11,7 @@ from .auth import AuthConfig
 from .database import create_tables
 from .routes.auth import auth_ns
 from .routes.songs import songs_ns
+from .routes.admin import admin_ns
 from .utils.error_handlers import register_error_handlers
 
 
@@ -50,6 +51,7 @@ def create_app(config_name: str = None) -> Flask:
     # Register namespaces
     api.add_namespace(auth_ns)
     api.add_namespace(songs_ns)
+    api.add_namespace(admin_ns)
 
     # Create database tables
     with app.app_context():
