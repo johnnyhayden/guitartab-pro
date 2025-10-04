@@ -2,7 +2,7 @@
   "master": {
     "tasks": [
       {
-        "id": 1,
+        "id": "1",
         "title": "Setup Project Repository",
         "description": "Initialize the project repository with version control and basic project structure.",
         "details": "Create a new Git repository for the project. Set up the basic directory structure for frontend and backend components. Initialize package managers for frontend (npm/yarn) and backend (pipenv/virtualenv).",
@@ -135,7 +135,7 @@
         "updatedAt": "2025-09-26T22:42:54.391Z"
       },
       {
-        "id": 2,
+        "id": "2",
         "title": "Database Schema Design",
         "description": "Design and implement the PostgreSQL database schema for users, songs, and songlists.",
         "details": "Create tables for Users, Songs, Songlists, Songlist_Songs, and User_Preferences. Define primary keys, foreign keys, and necessary indexes. Use SQLAlchemy for ORM mapping in the backend.",
@@ -262,7 +262,7 @@
         "updatedAt": "2025-09-26T22:51:38.859Z"
       },
       {
-        "id": 3,
+        "id": "3",
         "title": "User Authentication System",
         "description": "Implement JWT-based user authentication with secure password handling.",
         "details": "Use Flask-JWT-Extended for JWT handling and bcrypt for password hashing. Implement registration, login, and password reset endpoints. Store user credentials securely in the database.",
@@ -409,7 +409,7 @@
         "updatedAt": "2025-09-26T22:55:27.482Z"
       },
       {
-        "id": 4,
+        "id": "4",
         "title": "Basic Flask API Setup",
         "description": "Set up the core REST API endpoints for user and song management.",
         "details": "Create a Flask application with endpoints for CRUD operations on users and songs. Implement basic error handling and input validation.",
@@ -418,7 +418,7 @@
         "dependencies": [
           "3"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -426,8 +426,10 @@
             "description": "Implement create_app with env-specific config and register core extensions.",
             "dependencies": [],
             "details": "Scope:\n- Add app factory: create_app(env=None) selecting DevelopmentConfig, TestingConfig, ProductionConfig via APP_ENV/FLASK_ENV.\n- Configure: SECRET_KEY, SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS=False, JWT_SECRET_KEY (from Task 3), JSON_SORT_KEYS=False, PROPAGATE_EXCEPTIONS=True, default pagination limits.\n- Initialize extensions: SQLAlchemy, Marshmallow, Flask-Migrate, CORS, logging (structured with request-id), and optionally JWT (do not enforce auth yet).\n- Set API base prefix '/api/v1'; add simple '/api/health' endpoint.\nDeliverables:\n- config.py with config classes; app/__init__.py with create_app; extensions.py for initialized instances; .env.example.\nAcceptance Criteria:\n- create_app returns a Flask app with correct env config (TestingConfig uses in-memory SQLite and TESTING=True).\n- App boots and GET /api/health returns 200 JSON {\"status\":\"ok\"}.\n- Extensions are registered without runtime errors; URL prefixing works for '/api/v1/*'.",
-            "status": "pending",
-            "testStrategy": ""
+            "status": "done",
+            "testStrategy": "",
+            "updatedAt": "2025-09-26T22:59:02.855Z",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -437,8 +439,10 @@
               "4.1"
             ],
             "details": "Scope:\n- Create blueprints: users_bp (prefix '/api/v1/users'), songs_bp (prefix '/api/v1/songs').\n- Define CRUD routes: GET '' (list), POST '' (create), GET '<int:id>' (retrieve), PUT/PATCH '<int:id>' (update), DELETE '<int:id>' (delete).\n- Establish route names (e.g., users.list_users) and consistent ID param naming ('user_id', 'song_id').\n- Register blueprints in create_app; provide temporary stub handlers returning JSON placeholders until CRUD is implemented in Subtask 4.7.\nDeliverables:\n- app/users/routes.py and app/songs/routes.py with route stubs and registration wiring.\n- Routing conventions doc (versioning, nouns, no verbs, plural resources).\nAcceptance Criteria:\n- URL map includes all listed routes under '/api/v1'.\n- Temporary stub responses return 200 JSON {\"status\":\"stub\"} for list/get and 501 for unimplemented mutations (to be finalized in Subtask 4.7).",
-            "status": "pending",
-            "testStrategy": ""
+            "status": "done",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-09-26T22:59:02.873Z"
           },
           {
             "id": 3,
@@ -448,8 +452,10 @@
               "4.1"
             ],
             "details": "Scope:\n- Implement error handlers for: HTTPException (use code), Marshmallow ValidationError (422), SQLAlchemy IntegrityError (409), NotFound (404), generic Exception (500).\n- Response format: application/problem+json with fields: type (URI), title, status, detail, instance (request path), correlation_id, and errors (field-level issues map) when applicable.\n- Add request ID middleware (X-Request-ID; generate if missing) and include in logs and error responses.\n- Map unknown routes to 404 problem+json.\nDeliverables:\n- app/errors.py with handler registrations; middleware to attach correlation_id; documentation of error contract with examples.\nAcceptance Criteria:\n- Any raised HTTPException returns application/problem+json with correct status and headers.\n- Validation errors produce 422 with errors map; IntegrityError returns 409 with conflict detail.\n- Responses include correlation_id and instance; content-type is application/problem+json.",
-            "status": "pending",
-            "testStrategy": ""
+            "status": "done",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-09-26T22:59:02.888Z"
           },
           {
             "id": 4,
@@ -461,8 +467,10 @@
               "4.3"
             ],
             "details": "Scope:\n- Schemas: UserCreate(email, username, password), UserUpdate(optional fields), UserOut(id, email, username, created_at); SongCreate(title, artist, tuning?, difficulty?), SongUpdate, SongOut(id, title, artist, created_at).\n- Constraints: email format, username [a-z0-9_]{3,30}, password length>=8, title required; coerce/strip strings.\n- List envelope schema: { items: [...], meta: { page, per_page, total, pages, sort, order } }.\n- Implement decorators/helpers: validate_request(schema) -> parsed data on g; serialize_response(schema or envelope) -> consistent output.\n- Ensure sensitive fields (password) never serialized in responses.\nDeliverables:\n- app/schemas/user.py, app/schemas/song.py; app/utils/validation.py decorators; schema docs.\nAcceptance Criteria:\n- Invalid payloads yield 422 problem+json with field-level errors; valid payloads pass data to handlers.\n- Successful responses conform to output schemas; no password or sensitive data in any response.",
-            "status": "pending",
-            "testStrategy": ""
+            "status": "done",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-09-26T22:59:02.904Z"
           },
           {
             "id": 5,
@@ -475,8 +483,10 @@
               "4.4"
             ],
             "details": "Scope:\n- Helper parse_pagination(args, defaults): supports page>=1, per_page [1..100], defaults from config.\n- Sorting: parse_sort(args, allowed_fields) supporting 'sort' and 'order' or a '-field' syntax; validate allowed fields per resource.\n- SQLAlchemy integration: apply_pagination(query) returning items and total; build Link header (first, prev, next, last) and meta object.\n- Validation errors surface via problem+json (422) with clear messages; unknown sort fields rejected.\nDeliverables:\n- app/utils/pagination.py with parsing, SQLAlchemy helpers, and header/meta builders; usage examples in docstrings.\nAcceptance Criteria:\n- GET list endpoints can pass page/per_page/sort/order to helpers and receive consistent meta and Link headers.\n- Invalid pagination/sort inputs return 422 problem+json with errors map; defaults apply when params omitted.",
-            "status": "pending",
-            "testStrategy": ""
+            "status": "done",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-09-26T22:59:02.916Z"
           },
           {
             "id": 6,
@@ -490,8 +500,10 @@
               "4.5"
             ],
             "details": "Scope:\n- Define OpenAPI 3.0 spec (openapi.yaml/json) using apispec + Marshmallow schemas; include servers, tags (Users, Songs), components/schemas, and shared Problem+JSON error schema.\n- Annotate routes with operationIds, parameters (pagination/sort), request bodies, and standardized responses (200, 201 with Location, 204, 400/422/404/409 via problem+json).\n- Serve /api/openapi.json and Swagger UI at /api/docs.\n- CI: add job to validate spec with openapi-spec-validator and Spectral lint; fail build on errors.\nDeliverables:\n- docs/openapi.yaml; app/docs.py serving spec and docs; CI workflow config (e.g., .github/workflows/openapi-validate.yml).\nAcceptance Criteria:\n- GET /api/openapi.json returns a valid spec; Swagger UI loads with no console errors.\n- CI validation passes on main and PRs; error responses documented consistently across endpoints.",
-            "status": "pending",
-            "testStrategy": ""
+            "status": "done",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-09-26T22:59:02.931Z"
           },
           {
             "id": 7,
@@ -506,14 +518,16 @@
               "4.6"
             ],
             "details": "Scope:\n- Pytest setup: conftest.py with app(), client(), db() fixtures using TestingConfig; factory for sample users/songs; transactional test isolation.\n- Implement CRUD handlers using SQLAlchemy models (from Task 2) + schemas + pagination utilities:\n  - Users: POST create (201, Location), GET list (200 + meta + Link), GET by id (200/404), PATCH/PUT update (200/404), DELETE (204/404). Exclude password from responses.\n  - Songs: same pattern; define allowed sort fields.\n- Negative cases: validation 422, conflict 409 on unique constraints, not found 404, bad pagination/sort 422; all errors follow problem+json contract.\n- Optional: protect write operations with JWT (Task 3) behind a feature flag; tests can run without auth.\n- Coverage and run scripts.\nDeliverables:\n- Implemented route handlers replacing stubs; tests under tests/api/test_users.py and tests/api/test_songs.py; coverage config (>=80%).\nAcceptance Criteria:\n- All tests pass locally and in CI; coverage >=80% for app package.\n- Endpoints behavior:\n  - Create returns 201 with Location header pointing to resource URI and body matching *Out schema.\n  - List returns 200 with items[] and meta; Link header present when applicable.\n  - Get returns 200 with resource or 404 problem+json if missing.\n  - Update returns 200 with updated resource; partial updates accepted for PATCH.\n  - Delete returns 204 with empty body.\n- Error contract: application/problem+json with fields {type,title,status,detail,instance,correlation_id,errors?} for all error responses.",
-            "status": "pending",
-            "testStrategy": ""
+            "status": "done",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-09-26T22:59:02.945Z"
           }
         ],
-        "updatedAt": "2025-09-26T22:55:36.049Z"
+        "updatedAt": "2025-09-26T22:59:02.945Z"
       },
       {
-        "id": 5,
+        "id": "5",
         "title": "Frontend Framework Initialization",
         "description": "Initialize the frontend using a modern JavaScript framework (Vue.js or React).",
         "details": "Set up a new project using Vue CLI or Create React App. Configure routing and state management (Vuex or Redux). Implement a basic responsive layout.",
@@ -522,11 +536,170 @@
         "dependencies": [
           "1"
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Framework selection and project scaffold",
+            "description": "Decide between React or Vue and initialize the frontend using Vite (preferred) or CRA/Vue CLI.",
+            "dependencies": [],
+            "details": "Decide: React+Vite or Vue+Vite/CLI based on team expertise, ecosystem needs, and planned UI libraries. Initialize project (TypeScript recommended). Example commands: npm create vite@latest frontend -- --template react-ts or --template vue-ts; alternatively npx create-react-app frontend --template typescript or vue create frontend. Set package manager (npm/yarn/pnpm), add .gitignore, README, and basic src structure (components, pages, store, styles). Verify dev server and production build run. Acceptance checks: npm run dev shows starter page; npm run build completes without errors; initial structure committed.",
+            "status": "done",
+            "testStrategy": "",
+            "updatedAt": "2025-10-04T13:19:13.623Z",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Routing setup and basic pages",
+            "description": "Install and configure routing with base pages and a 404 route.",
+            "dependencies": [
+              "5.1"
+            ],
+            "details": "Install router: React -> npm i react-router-dom; Vue -> npm i vue-router. Configure routes: '/', '/songs' (placeholder), '/about', and a catch-all 404. Create pages: Home, SongsPlaceholder, About, NotFound. Add a simple navigation header linking routes; enable history mode. Optional: code-split routes. Acceptance checks: navigating via links and direct URL loads the correct page without console errors; unknown route shows 404; minimal smoke test for Home page passes with npm run test.",
+            "status": "done",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-04T13:22:54.569Z"
+          },
+          {
+            "id": 3,
+            "title": "State management baseline",
+            "description": "Set up a global store (Redux Toolkit for React or Pinia/Vuex for Vue) with an initial slice/module.",
+            "dependencies": [
+              "5.1",
+              "5.2"
+            ],
+            "details": "React: npm i @reduxjs/toolkit react-redux; Vue: npm i pinia (or vuex if required). Create store with an app slice/module (e.g., ui flags) and an auth placeholder. Wire Provider into app root and expose typed hooks (React) or usePinia() (Vue). Add an example async action to fetch a backend health/config using API URL env. Enable devtools. Acceptance checks: a button on Home toggles/increments state via dispatch and reflects across routes; reducer/unit test passes; no type errors; npm run test succeeds.",
+            "status": "done",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-04T13:30:00.842Z"
+          },
+          {
+            "id": 4,
+            "title": "UI layout, theme, and responsive grid",
+            "description": "Implement responsive app shell with base theme tokens and grid.",
+            "dependencies": [
+              "5.1",
+              "5.2"
+            ],
+            "details": "Choose styling approach: Tailwind CSS or CSS Modules/SCSS (optionally a component library like MUI/Chakra/Element Plus). Create AppShell with header, nav, main content, and footer; implement responsive grid/containers and mobile nav. Define theme tokens (colors, spacing, typography) via CSS variables or library theme config. Ensure basic accessibility (landmarks, focus styles). Acceptance checks: layout adapts correctly on mobile/tablet/desktop; no horizontal scroll on common breakpoints; lighthouse performance/accessibility reasonable (>=80); visual smoke check passes.",
+            "status": "done",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-04T13:31:35.646Z"
+          },
+          {
+            "id": 5,
+            "title": "Lint, format, and test tooling with scripts",
+            "description": "Configure ESLint, Prettier, and unit testing (Jest/Vitest) with useful npm scripts and pre-commit hooks.",
+            "dependencies": [
+              "5.1"
+            ],
+            "details": "Install and configure ESLint + Prettier (+ TypeScript plugins); add .editorconfig. Set up unit tests: Vitest (Vite) or Jest; React Testing Library or Vue Test Utils for component tests. Add scripts: dev, build, preview, lint, lint:fix, format, test, test:watch, type-check. Optional: Husky + lint-staged to run lint/test on pre-commit. Acceptance checks: npm run lint passes; npm run test passes with at least one component and one reducer/module test; formatting consistent; pre-commit hook blocks on errors (if enabled).",
+            "status": "done",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-04T13:27:14.097Z"
+          },
+          {
+            "id": 6,
+            "title": "CI pipeline and environment variables handling",
+            "description": "Set up CI to run install/lint/test/build and standardize environment variables for dev/prod.",
+            "dependencies": [
+              "5.1",
+              "5.5"
+            ],
+            "details": "Create CI workflow (e.g., GitHub Actions) to cache deps and run: install, npm run lint, npm run test, npm run build; upload build artifact. Add .env.example and environment files (.env.development, .env.production). Use Vite envs (VITE_API_URL) or framework-specific prefixes (REACT_APP_/VUE_APP_). Implement configuration loader with runtime guard for required envs and document usage in README. Acceptance checks: CI passes on PRs; local dev reads .env.development; production build uses .env.production; missing required env surfaces a clear error; npm run build succeeds in CI.",
+            "status": "done",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-04T13:36:05.314Z"
+          },
+          {
+            "id": 7,
+            "title": "Framework selection and project scaffold",
+            "description": "Choose React or Vue and initialize the frontend project scaffold with Vite (preferred) or CRA/Vue CLI.",
+            "dependencies": [],
+            "details": "Decide framework and tooling: React (with TypeScript) or Vue 3 (with TypeScript); prefer Vite for faster DX. Set Node version (e.g., .nvmrc) and package manager (npm or yarn). For React (Vite): npm create vite@latest frontend -- --template react-swc-ts. For Vue (Vite): npm create vite@latest frontend -- --template vue-ts. Alternatives: React (CRA): npx create-react-app frontend --template typescript. Vue CLI: npm i -g @vue/cli && vue create frontend (select TS). Initialize repository if needed and commit scaffold. Verify commands: npm install; npm run dev (app serves locally without errors); npm run build (build completes). Acceptance: dev server renders default page, build succeeds, initial commit pushed.",
+            "status": "done",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-04T13:22:05.659Z"
+          },
+          {
+            "id": 8,
+            "title": "Routing setup and basic pages",
+            "description": "Add client-side routing and create basic pages (Home, About, Not Found) with a shared layout.",
+            "dependencies": [
+              "5.7"
+            ],
+            "details": "Install router: React: npm i react-router-dom@6. Vue: npm i vue-router@4. Create pages/views: Home, About, NotFound. Define routes with lazy-loaded components and a catch-all 404 route. Add a simple Layout (header/nav/main/footer) with navigation links. Enable deep-link refresh handling (BrowserRouter for React, history mode for Vue). Manual checks: navigate via links, use back/forward, direct-load nested route; 404 renders for unknown path. Commands: npm run dev (routes function), npm run build (router compiles). Acceptance: navigation works across pages and 404, no console errors in dev, build succeeds.",
+            "status": "done",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-04T13:27:52.792Z"
+          },
+          {
+            "id": 9,
+            "title": "State management baseline",
+            "description": "Introduce a global store and wire it to the app with a simple slice/module and example usage.",
+            "dependencies": [
+              "5.7"
+            ],
+            "details": "Pick library: React: npm i @reduxjs/toolkit react-redux; Vue: npm i pinia (or vuex@next if required). Initialize store and provider: React: configureStore and <Provider store={store}> in main entry. Vue: createPinia() and app.use(pinia). Create a basic slice/module (e.g., ui/theme with toggle). Connect a component to read and update state (theme toggle). Add devtools integration (Redux DevTools or Pinia devtools). Acceptance: toggling updates UI state in the page; no runtime errors; later when tests are set up, a unit test validates initial state and a reducer/action updates state as expected.",
+            "status": "done",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-04T13:29:08.625Z"
+          },
+          {
+            "id": 10,
+            "title": "UI layout, theme, and responsive grid",
+            "description": "Implement a responsive base layout with theme variables and grid/flex utilities.",
+            "dependencies": [
+              "5.7",
+              "5.9"
+            ],
+            "details": "Choose styling approach: Tailwind CSS (recommended) or CSS Modules/SCSS. Tailwind setup (Vite): npm i -D tailwindcss postcss autoprefixer && npx tailwindcss init -p; configure content paths and include Tailwind in main CSS. Define CSS variables for light/dark theme and connect to state (theme toggle from store). Build responsive layout: header with brand, nav, main content container, footer; mobile-first with breakpoints; ensure accessible skip link and focus styles. Add basic grid/flex utilities for content areas. Manual checks at widths 360px, 768px, 1024px+: no horizontal scroll, nav collapses/works, contrasts meet WCAG AA. Commands: npm run dev (responsive works), npm run build. Acceptance: layout adapts across breakpoints, theme toggle updates styles, build succeeds with no CSS errors.",
+            "status": "done",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-04T13:41:21.880Z"
+          },
+          {
+            "id": 11,
+            "title": "Lint, format, tests, and project scripts",
+            "description": "Configure ESLint, Prettier, and testing (Vitest/Jest + Testing Library) with npm scripts and pre-commit hooks.",
+            "dependencies": [
+              "5.7"
+            ],
+            "details": "Install and configure ESLint + Prettier. React: npm i -D eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin eslint-plugin-react eslint-plugin-react-hooks eslint-config-prettier prettier. Vue: npm i -D eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin eslint-plugin-vue eslint-config-prettier prettier. Add .eslintrc and .prettierrc; ignore files as needed. Testing: prefer Vitest + jsdom. React: npm i -D vitest @vitest/coverage-v8 jsdom @testing-library/react @testing-library/user-event @testing-library/jest-dom. Vue: npm i -D vitest @vitest/coverage-v8 jsdom @testing-library/vue @testing-library/user-event @testing-library/jest-dom. Configure vitest in vite.config or vitest.config. Add example tests for Home page and store (if React: reducer test; if Vue: store action). Add scripts: \"dev\", \"build\", \"preview\", \"lint\", \"lint:fix\", \"format\", \"test\", \"test:watch\", \"coverage\", and optionally \"type-check\". Set up Husky + lint-staged for pre-commit: npm i -D husky lint-staged && npx husky init; configure pre-commit to run lint-staged and tests on changed files. Acceptance: npm run lint passes, npm run test passes with coverage report, pre-commit hook runs successfully on staged changes.",
+            "status": "done",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-04T13:29:53.549Z"
+          },
+          {
+            "id": 12,
+            "title": "CI workflow and environment variables handling",
+            "description": "Create CI pipeline to run install/lint/test/build and standardize environment variable management.",
+            "dependencies": [
+              "5.7",
+              "5.11"
+            ],
+            "details": "Set up GitHub Actions workflow (.github/workflows/ci.yml). Steps: checkout, setup-node (LTS), dependency cache, install, run lint, type-check (if enabled), tests with coverage, and build; upload dist as artifact. Matrix Node versions if needed. Add .env.example with documented variables: Vite uses VITE_* (e.g., VITE_API_BASE_URL); CRA uses REACT_APP_*; gitignore .env*. Load env in code via import.meta.env.VITE_* (Vite) or process.env.REACT_APP_*. Document env usage in README and how to run locally (npm run dev) with .env. For preview deployments (optional), add a deploy job (e.g., to Vercel/Netlify) consuming env from repo secrets. Acceptance: CI passes on PRs (install, lint, test, build all succeed), build artifact generated, env variables are not committed, app reads expected env at runtime in dev and after build.",
+            "status": "done",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-04T13:42:26.568Z"
+          }
+        ],
+        "updatedAt": "2025-10-04T13:42:26.568Z"
       },
       {
-        "id": 6,
+        "id": "6",
         "title": "Song CRUD Operations",
         "description": "Implement create, read, update, and delete operations for songs in the backend.",
         "details": "Develop API endpoints for song CRUD operations. Ensure proper validation and error handling. Integrate with the database using SQLAlchemy.",
@@ -535,11 +708,111 @@
         "dependencies": [
           "4"
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "in-progress",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Define DTOs/Schemas for Song Input/Output",
+            "description": "Create Marshmallow schemas for SongCreate, SongUpdate, SongOut, and ListQueryParams with field constraints and defaults.",
+            "dependencies": [],
+            "details": "Fields and constraints:\n- SongCreate: title (str, 1-200, required), artist (str, 1-120, required), album (str, 0-160, optional), duration_seconds (int, 1..36000, required), release_date (date, optional, not in future), genre (str, 0-60, optional), is_public (bool, default true).\n- SongUpdate: partial=True; same fields as SongCreate except all optional. Prevent updates to immutable fields like id, owner_id, created_at.\n- SongOut: id, owner_id, title, artist, album, duration_seconds, release_date, genre, is_public, created_at, updated_at.\n- ListQueryParams: page (int, >=1, default 1), per_page (int, 1..100, default 25), sort_by (enum: title|artist|created_at, default created_at), sort_order (enum: asc|desc, default desc), filters: title (str), artist (str), genre (str), owner_id (int), is_public (bool), scope (enum: public|mine|all; optional; for auth-aware listing).\nAcceptance criteria:\n- Schemas perform validation, deserialization, and serialization with correct types and defaults applied.\n- Unknown fields are rejected with clear error messages.\n- SongOut serializes datetime fields in ISO 8601.\n- ListQueryParams enforces allowed sort_by and sort_order values.\n<info added on 2025-10-04T13:46:16.511Z>\n- Implemented Pydantic-based DTOs/schemas:\n  - SongCreateSchema (validates required fields)\n  - SongUpdateSchema (partial updates; blocks immutable fields: id, owner_id, created_at)\n  - SongResponseSchema (complete output model with id, owner_id, title, artist, album, duration_seconds, release_date, genre, is_public, created_at, updated_at)\n  - SongListResponseSchema (paginated response: items, page, per_page, total, pages)\n  - SongQueryParams (page >= 1 default 1; per_page 1..100 default 25; sort_by in title|artist|created_at default created_at; sort_order in asc|desc default desc; filters: title, artist, genre, owner_id, is_public; scope in public|mine|all)\n- Validation and behavior:\n  - Enforces field length limits, duration_seconds range (1..36000), and release_date not in the future\n  - Rejects unknown/extra fields with clear error messages (extra = forbid)\n  - Datetime fields serialize to ISO 8601\n  - Proper type hints with UUID for id and owner_id\n  - URL fields (if present) validated for HTTP/HTTPS format\n  - Optional content fields (lyrics, chords, tab) limited to 50KB each\n  - Field descriptions and examples included for documentation\n  - ORM integration enabled (orm_mode) for SQLAlchemy compatibility\n- Files added:\n  - Module initialization for the schemas package\n  - Complete schema definitions module for songs\n</info added on 2025-10-04T13:46:16.511Z>",
+            "status": "done",
+            "testStrategy": "",
+            "updatedAt": "2025-10-04T13:46:20.438Z",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implement Service/Repository Layer with SQLAlchemy",
+            "description": "Create repository and service functions to manage Song persistence and business rules.",
+            "dependencies": [
+              "6.1"
+            ],
+            "details": "Implement functions (with type-hinted signatures):\n- create_song(data: SongCreate, owner_id: int) -> Song\n- get_song(song_id: int) -> Song (or raise NoResultFound)\n- list_songs(filters, pagination, sorting, viewer) -> (items, total)\n- update_song(song_id: int, data: SongUpdate, actor) -> Song\n- delete_song(song_id: int, actor) -> None\nRepository/service responsibilities:\n- Use SQLAlchemy sessions with proper transaction boundaries and rollback on exceptions.\n- Eager-load relationships needed by API serialization to avoid N+1 queries.\n- Enforce updated_at timestamps on update.\n- Handle IntegrityError and map to higher-level errors for the API layer.\n- Ensure delete removes the song and cascades/removes any Songlist_Songs associations per existing schema configuration.\nAcceptance criteria:\n- Creating a song returns a persisted entity with an assigned id and timestamps.\n- Updating changes are committed and reflected when reloaded; updated_at changes.\n- Deleting removes row from DB and related associations per schema; subsequent fetch raises NoResultFound.\n- list_songs supports filters, pagination, and sorting inputs (to be extended in subtask 5) and returns total count.\n<info added on 2025-10-04T13:48:03.175Z>\n- Implemented BaseService and SongService classes with type-hinted CRUD methods: create_song, get_song, list_songs, update_song, delete_song.\n- Added filtering, pagination, and sorting to list_songs, returning (items, total).\n- Enforced ownership verification for update and delete operations; unauthorized actions raise a service-level PermissionDenied error.\n- Managed SQLAlchemy sessions with explicit transaction boundaries; commit on success and rollback on exceptions.\n- Eager-loaded required relationships for API serialization to prevent N+1 queries.\n- Ensured updated_at is set on every modification.\n- Handled IntegrityError and mapped to higher-level Conflict/Validation errors for the API layer.\n- Deletion respects cascade rules; related Songlist_Songs associations are removed per schema.\n- All modules compile successfully.\n</info added on 2025-10-04T13:48:03.175Z>",
+            "status": "done",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-04T13:48:06.341Z"
+          },
+          {
+            "id": 3,
+            "title": "Build Song CRUD API Endpoints",
+            "description": "Expose Flask endpoints for create, read (single/list), update, and delete operations.",
+            "dependencies": [
+              "6.1",
+              "6.2"
+            ],
+            "details": "Endpoints (Flask Blueprint /songs):\n- POST /songs: Auth required. Body: SongCreate. Returns 201 with SongOut and Location header /songs/{id}.\n- GET /songs/{id}: Returns 200 with SongOut if accessible (see auth rules). 404 if not found, 403 if forbidden.\n- GET /songs: Supports ListQueryParams for pagination/filtering/sorting. Returns 200 with {items: [SongOut], meta: {page, per_page, total, total_pages, sort_by, sort_order, filters}}.\n- PATCH /songs/{id}: Auth required. Body: SongUpdate (partial). Returns 200 with SongOut.\n- DELETE /songs/{id}: Auth required. Returns 204 with empty body.\nGeneral:\n- Consistent JSON response shapes; no HTML error pages.\n- Content-Type application/json enforced where applicable.\nAcceptance criteria:\n- Each endpoint wired to service layer and schemas, returning correct HTTP status codes and payloads.\n- Location header set on create; PATCH idempotent for repeated same payloads.\n- Unsupported methods return 405.\n<info added on 2025-10-04T13:51:09.845Z>\n- Implemented Flask-RESTX namespace (songs_ns) under /api/songs with routes:\n  - POST /api/songs (auth) — creates song; returns 201 with SongOut and Location: /api/songs/{id}\n  - GET /api/songs — lists songs with filtering/sorting/pagination; returns {items, meta}\n  - GET /api/songs/{id} — public; returns SongOut and increments view count\n  - PUT /api/songs/{id} (auth, owner) — updates song (idempotent)\n  - DELETE /api/songs/{id} (auth, owner) — deletes song; returns 204\n  - GET /api/songs/user (auth) — returns current user’s songs\n  - POST /api/songs/{id}/rate (auth) — rate a song\n- JWT authentication applied to protected endpoints; ownership verification enforced for update/delete.\n- Request validation via Marshmallow schemas (bodies and query params); automatic API documentation through Flask-RESTX.\n- Consistent JSON responses with Content-Type application/json; centralized error handling returning 400, 401, 403, 404, 409, 422, 500; 405 for unsupported methods.\n- Endpoints wired to service/repository layer and schemas; correct HTTP status codes and payloads; no HTML error pages.\n- Registered songs_ns with the main app and updated API root to include songs URLs.\n- Code compiles successfully and is ready for testing.\n</info added on 2025-10-04T13:51:09.845Z>",
+            "status": "done",
+            "testStrategy": "",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-04T13:52:45.810Z"
+          },
+          {
+            "id": 4,
+            "title": "Integrate Validation and Centralized Error Mapping",
+            "description": "Apply schema validation and implement a unified error handler to map exceptions to API errors.",
+            "dependencies": [
+              "6.1",
+              "6.2",
+              "6.3"
+            ],
+            "details": "Validation:\n- Use Marshmallow to load and validate request bodies and query params; reject unknown fields.\nError handling:\n- Central handler mapping:\n  - Schema validation errors -> 422 Unprocessable Entity with {error: {code: \"validation_error\", message, details: {field: [messages]}}}.\n  - SQLAlchemy NoResultFound -> 404 Not Found with code \"not_found\".\n  - IntegrityError -> 409 Conflict with code \"conflict\" and DB constraint info (redacted/safe).\n  - JWT/authorization failures -> 401 Unauthorized or 403 Forbidden with codes \"unauthorized\"/\"forbidden\".\n  - Malformed JSON -> 400 Bad Request with code \"bad_request\".\n- Ensure consistent error envelope and correlation id logging.\nAcceptance criteria:\n- Invalid payloads and query params yield 422 with field-level messages.\n- Missing/invalid JWT yields 401 with WWW-Authenticate header.\n- Forbidden operations yield 403; non-existent resources yield 404.\n- Integrity errors yield 409; responses never expose raw SQL or stack traces in production mode.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Add Pagination, Filtering, and Sorting Primitives",
+            "description": "Implement safe query building for list endpoint with pagination, filters, and sortable columns.",
+            "dependencies": [
+              "6.1",
+              "6.2",
+              "6.3",
+              "6.4"
+            ],
+            "details": "Capabilities:\n- Pagination: page/per_page via offset/limit; cap per_page at 100; include total and total_pages.\n- Sorting: whitelist columns [title, artist, created_at]; support asc/desc; default created_at desc; stable ordering.\n- Filtering: title and artist case-insensitive substring (ILIKE %q%), genre exact match, owner_id exact, is_public boolean.\n- Query builder composes filters and sorting safely (no SQL injection), leveraging SQLAlchemy column references.\nAcceptance criteria:\n- GET /songs returns correct counts and items for various page/per_page inputs and includes meta fields.\n- Sorting order is applied as requested; invalid sort fields/order rejected via 422.\n- Filters reduce result set appropriately and can be combined with pagination.\n- Performance: listing executes a bounded number of queries (no N+1), and COUNT is accurate.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 6,
+            "title": "Implement Authorization Hooks (Owner/Admin Ready)",
+            "description": "Add authorization checks for create, read, update, and delete actions using JWT and role/ownership rules.",
+            "dependencies": [
+              "6.2",
+              "6.3",
+              "6.4"
+            ],
+            "details": "Auth model and rules:\n- Authentication: use JWT; user extracted from token; assume user.is_admin boolean is available.\n- Create: authenticated users only; owner_id set to current user id.\n- Read single: public songs accessible to anyone; private songs (is_public=false) only to owner or admin -> otherwise 403.\n- List: anonymous users see only public songs; authenticated users by default see public songs; support scope filter: mine (only their songs), public (only is_public=true), all (admin only, else 403).\n- Update/Delete: only owner or admin may modify/delete; enforce both at endpoint decorator/middleware and in service layer.\nImplementation:\n- Authorization decorator/util (e.g., can_manage_song) and checks inside service methods as defense in depth.\n- Ensure forbidden reasons are mapped to 403 via error handler.\nAcceptance criteria:\n- Unauthorized access to protected endpoints returns 401; insufficient privileges return 403.\n- Owners can update/delete their songs; non-owners cannot.\n- Admin can manage any song.\n- List endpoint enforces scope semantics as specified.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 7,
+            "title": "Write Unit/Integration Tests and Test Fixtures",
+            "description": "Create fixtures and comprehensive tests covering CRUD, validation, pagination/filtering/sorting, and authorization.",
+            "dependencies": [
+              "6.1",
+              "6.2",
+              "6.3",
+              "6.4",
+              "6.5",
+              "6.6"
+            ],
+            "details": "Fixtures:\n- Users: admin, owner, other_user; JWT helpers.\n- Songs: factories to create public/private songs for different owners.\n- Database/session: transactional test DB with rollback between tests.\nTests (examples, not exhaustive):\n- Create: 201 on valid input; body matches SongOut; 422 on invalid fields; owner_id set to actor.\n- Read single: 200 for public; 403 for private when not owner/admin; 404 when not found.\n- List: correct pagination meta; sorting correctness; case-insensitive title/artist filtering; scope behavior for anonymous/auth/admin.\n- Update: 200 with updated fields; 403 for non-owner; 422 for invalid update; immutable fields not changeable.\n- Delete: 204 success; subsequent get returns 404; 403 for non-owner.\n- Error mapping: verify 400, 401, 403, 404, 409, 422 responses with standardized error envelope.\n- Data integrity: verify updated_at changes on update; cascades or association cleanup on delete; no N+1 queries on list.\nAcceptance criteria:\n- All tests pass locally and in CI; coverage >= 80% for service and endpoints; tests assert both payload shape and HTTP codes.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          }
+        ],
+        "updatedAt": "2025-10-04T13:52:45.810Z"
       },
       {
-        "id": 7,
+        "id": "7",
         "title": "Basic Search Functionality",
         "description": "Implement simple text-based search for songs by title and artist.",
         "details": "Use PostgreSQL full-text search capabilities to implement search functionality. Create API endpoints to handle search queries.",
@@ -611,7 +884,7 @@
         ]
       },
       {
-        "id": 8,
+        "id": "8",
         "title": "Core Song Display",
         "description": "Develop the frontend component for displaying songs with basic chord/lyric formatting.",
         "details": "Create a song display component that formats chords and lyrics. Ensure responsive design and compatibility across devices.",
@@ -625,7 +898,7 @@
         "subtasks": []
       },
       {
-        "id": 9,
+        "id": "9",
         "title": "User Preferences Management",
         "description": "Implement storage and retrieval of user preferences for display settings.",
         "details": "Create API endpoints to save and retrieve user preferences. Update the frontend to allow users to customize their display settings.",
@@ -639,7 +912,7 @@
         "subtasks": []
       },
       {
-        "id": 10,
+        "id": "10",
         "title": "API Integration for Song Import",
         "description": "Integrate with external APIs (Ultimate Guitar, Songsterr) for song import.",
         "details": "Develop backend services to fetch and import songs from external APIs. Handle API authentication and rate limits.",
@@ -655,14 +928,12 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-09-26T22:55:36.051Z",
+      "lastModified": "2025-10-04T13:52:45.811Z",
       "taskCount": 10,
-      "completedCount": 3,
+      "completedCount": 5,
       "tags": [
         "master"
-      ],
-      "created": "2025-09-26T22:55:40.099Z",
-      "description": "Tasks for master context"
+      ]
     }
   }
 }
