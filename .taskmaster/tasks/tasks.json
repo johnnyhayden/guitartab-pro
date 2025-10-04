@@ -758,9 +758,10 @@
               "6.3"
             ],
             "details": "Validation:\n- Use Marshmallow to load and validate request bodies and query params; reject unknown fields.\nError handling:\n- Central handler mapping:\n  - Schema validation errors -> 422 Unprocessable Entity with {error: {code: \"validation_error\", message, details: {field: [messages]}}}.\n  - SQLAlchemy NoResultFound -> 404 Not Found with code \"not_found\".\n  - IntegrityError -> 409 Conflict with code \"conflict\" and DB constraint info (redacted/safe).\n  - JWT/authorization failures -> 401 Unauthorized or 403 Forbidden with codes \"unauthorized\"/\"forbidden\".\n  - Malformed JSON -> 400 Bad Request with code \"bad_request\".\n- Ensure consistent error envelope and correlation id logging.\nAcceptance criteria:\n- Invalid payloads and query params yield 422 with field-level messages.\n- Missing/invalid JWT yields 401 with WWW-Authenticate header.\n- Forbidden operations yield 403; non-existent resources yield 404.\n- Integrity errors yield 409; responses never expose raw SQL or stack traces in production mode.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-04T14:03:11.614Z"
           },
           {
             "id": 5,
@@ -772,10 +773,11 @@
               "6.3",
               "6.4"
             ],
-            "details": "Capabilities:\n- Pagination: page/per_page via offset/limit; cap per_page at 100; include total and total_pages.\n- Sorting: whitelist columns [title, artist, created_at]; support asc/desc; default created_at desc; stable ordering.\n- Filtering: title and artist case-insensitive substring (ILIKE %q%), genre exact match, owner_id exact, is_public boolean.\n- Query builder composes filters and sorting safely (no SQL injection), leveraging SQLAlchemy column references.\nAcceptance criteria:\n- GET /songs returns correct counts and items for various page/per_page inputs and includes meta fields.\n- Sorting order is applied as requested; invalid sort fields/order rejected via 422.\n- Filters reduce result set appropriately and can be combined with pagination.\n- Performance: listing executes a bounded number of queries (no N+1), and COUNT is accurate.",
-            "status": "pending",
+            "details": "Capabilities:\n- Pagination: page/per_page via offset/limit; cap per_page at 100; include total and total_pages.\n- Sorting: whitelist columns [title, artist, created_at]; support asc/desc; default created_at desc; stable ordering.\n- Filtering: title and artist case-insensitive substring (ILIKE %q%), genre exact match, owner_id exact, is_public boolean.\n- Query builder composes filters and sorting safely (no SQL injection), leveraging SQLAlchemy column references.\nAcceptance criteria:\n- GET /songs returns correct counts and items for various page/per_page inputs and includes meta fields.\n- Sorting order is applied as requested; invalid sort fields/order rejected via 422.\n- Filters reduce result set appropriately and can be combined with pagination.\n- Performance: listing executes a bounded number of queries (no N+1), and COUNT is accurate.\n<info added on 2025-10-04T14:07:04.454Z>\nEnhancements:\n- Added pagination.py with PaginationInfo, PaginatedResult, AdvancedPagination (offset and cursor), PaginationBuilder, and PageCache (LRU). Cursor-based pagination enables efficient traversal with stable ordering; offset-based pagination continues to support page/per_page (capped at 100) with total and pages.\n- Extended filter primitives to support user scope (owner_id, is_public), genre, title/artist ILIKE, and numeric range filters for difficulty, year, and rating. Cross-field validation rejects ranges where min > max.\n- Introduced schemas to support advanced querying and operations: SongQueryParams, AdvancedSearchParams, BulkUpdateSchema, BulkDeleteSchema, and FilterOptionsSchema.\n- Added specialized query builders: get_popular_songs (views desc), get_top_rated_songs (rating desc), get_recent_songs (created_at desc), plus artist- and genre-scoped retrieval with pagination.\n- Implemented transactional bulk operations (bulk update/delete) using whitelisted columns and safe SQLAlchemy expressions.\n- Exposed endpoints powered by these primitives: /songs/popular, /songs/top-rated, /songs/recent, /songs/filter-options, /songs/advanced-search, /songs/bulk-update, /songs/bulk-delete, /songs/artist/<name>, /songs/genre/<name>.\n- Performance: all filtering/sorting is database-level; optional cursor mode for large datasets; bounded query count with no N+1; LRU caching for paginated results with configurable size.\n\nUpdated acceptance criteria:\n- Offset and cursor pagination both return correct items and metadata (has_next/prev and next/prev pointers). Invalid cursors/params yield 422 via centralized error mapping.\n- Range filters (year, difficulty, rating) reduce results correctly, enforce min ≤ max, and combine with other filters and pagination.\n- Sorting remains restricted to supported fields and order; invalid sort rejected with 422; ordering is stable and deterministic across pages.\n- Specialized endpoints return correctly ordered results: popular by views, top-rated by rating, recent by created_at; artist/genre endpoints paginate correctly.\n- Bulk update/delete are atomic; partial failures roll back and return structured errors.\n- Filter options endpoint returns distinct genres, artists, albums, and years, scoped appropriately.\n- Listing and specialized queries execute within a bounded number of queries and produce accurate counts; cursor mode avoids unnecessary full COUNT scans.\n</info added on 2025-10-04T14:07:04.454Z>",
+            "status": "done",
             "testStrategy": "",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-04T14:07:09.051Z"
           },
           {
             "id": 6,
@@ -809,7 +811,7 @@
             "parentId": "undefined"
           }
         ],
-        "updatedAt": "2025-10-04T13:52:45.810Z"
+        "updatedAt": "2025-10-04T14:07:09.051Z"
       },
       {
         "id": "7",
@@ -928,7 +930,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-04T13:52:45.811Z",
+      "lastModified": "2025-10-04T14:07:09.052Z",
       "taskCount": 10,
       "completedCount": 5,
       "tags": [

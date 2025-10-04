@@ -13,6 +13,9 @@ from ..schemas.song import (
     SongUpdateSchema,
     SongResponseSchema,
     SongListResponseSchema,
+    AdvancedSearchParams,
+    BulkUpdateSchema,
+    FilterOptionsSchema,
 )
 from ..services.song_service import SongService
 from ..utils.exceptions import (
@@ -20,8 +23,9 @@ from ..utils.exceptions import (
     PermissionDeniedError,
     ValidationError,
 )
-from ..utils.responses import SchemaResponse, ErrorResponse
+from ..utils.responses import SchemaResponse, APIResponse, ErrorResponse
 from ..utils.validation import FieldValidator, RequestValidator
+from ..utils.pagination import AdvancedPagination, PaginationBuilder
 
 # Create namespace
 songs_ns = Namespace("songs", description="Song operations")
@@ -59,12 +63,19 @@ class SongList(Resource):
             db = get_db()
             current_user_id = UUID(get_jwt_identity())
 
-            # Get songs through service
+            # Get songs through enhanced service
             songs, total = song_service.list_songs(
                 db=db, query_params=query_params, current_user_id=current_user_id
             )
 
-            return SchemaResponse.songs_list_response(songs, total, page, per_page)
+            # Create pagination info using advanced pagination
+            pagination_info = AdvancedPagination.offset_based_paginate(
+                db.query(song_service.model), 
+                page=page, 
+                per_page=per_page
+            )[1]
+
+            return SchemaResponse.songs_list_response(songs, pagination_info.total, page, per_page)
 
         except ValidationError as e:
             return ErrorResponse.from_exception(e)
@@ -100,6 +111,209 @@ class SongList(Resource):
             return ErrorResponse.from_exception(e)
         except Exception as e:
             return ErrorResponse.service_error(f"Failed to create song: {str(e)}")
+
+
+@songs_ns.route("/advanced-search")
+class AdvancedSearch(Resource):
+    @songs_ns.doc("advanced_search")
+    @jwt_required()
+    def post(self):
+        """Advanced search with multiple criteria."""
+        try:
+            # Validate advanced search parameters
+            search_params = AdvancedSearchParams(**request.json)
+            
+            db = get_db()
+
+            # Perform advanced search
+            songs, total = song_service.search_songs_advanced(
+                db=db,
+                search_term=search_params.query or "",
+                artist=search_params.artist,
+                album=search_params.album,
+                genre=",".join(search_params.genre) if search_params.genre else None,
+                year_from=search_params.year_from,
+                year_to=search_params.year_to,
+                difficulty_min=min(search_params.difficulty_range) if search_params.difficulty_range else None,
+                difficulty_max=max(search_params.difficulty_range) if search_params.difficulty_range else None,
+                rating_min=search_params.rating_min,
+                rating_max=search_params.rating_max,
+                limit=search_params.per_page
+            )
+
+            return SchemaResponse.songs_list_response(
+                songs, total, search_params.page, search_params.per_page
+            )
+
+        except ValidationError as e:
+            return ErrorResponse.from_exception(e)
+        except Exception as e:
+            return ErrorResponse.service_error(f"Advanced search failed: {str(e)}")
+
+
+@songs_ns.route("/popular")
+class PopularSongs(Resource):
+    @songs_ns.doc("popular_songs")
+    def get(self):
+        """Get popular songs based on views."""
+        try:
+            limit = int(request.args.get('limit', 10))
+            limit = min(max(limit, 1), 50)  # Between 1 and 50
+            
+            db = get_db()
+            songs = song_service.get_popular_songs(db, limit)
+            
+            return APIResponse.success(
+                f"Retrieved {len(songs)} popular songs",
+                data=[SongResponseSchema.model_validate(song).model_dump() for song in songs]
+            )
+
+        except Exception as e:
+            return ErrorResponse.service_error(f"Failed to get popular songs: {str(e)}")
+
+
+@songs_ns.route("/top-rated")
+class TopRatedSongs(Resource):
+    @songs_ns.doc("top_rated_songs")
+    def get(self):
+        """Get top-rated songs."""
+        try:
+            limit = int(request.args.get('limit', 10))
+            limit = min(max(limit, 1), 50)  # Between 1 and 50
+            
+            db = get_db()
+            songs = song_service.get_top_rated_songs(db, limit)
+            
+            return APIResponse.success(
+                f"Retrieved {len(songs)} top-rated songs",
+                data=[SongResponseSchema.model_validate(song).model_dump() for song in songs]
+            )
+
+        except Exception as e:
+            return ErrorResponse.service_error(f"Failed to get top-rated songs: {str(e)}")
+
+
+@songs_ns.route("/recent")
+class RecentSongs(Resource):
+    @songs_ns.doc("recent_songs")
+    def get(self):
+        """Get recent songs."""
+        try:
+            limit = int(request.args.get('limit', 10))
+            limit = min(max(limit, 1), 50)  # Between 1 and 50
+            
+            db = get_db()
+            songs = song_service.get_recent_songs(db, limit)
+            
+            return APIResponse.success(
+                f"Retrieved {len(songs)} recent songs",
+                data=[SongResponseSchema.model_validate(song).model_dump() for song in songs]
+            )
+
+        except Exception as e:
+            return ErrorResponse.service_error(f"Failed to get recent songs: {str(e)}")
+
+
+@songs_ns.route("/filter-options")
+class FilterOptions(Resource):
+    @songs_ns.doc("get_filter_options")
+    def get(self):
+        """Get available filter options."""
+        try:
+            db = get_db()
+            
+            # Get distinct values for filter options
+            genres = db.query(song_service.model.genre).filter(
+                song_service.model.genre.isnot(None),
+                song_service.model.is_public == True
+            ).distinct().all()
+            
+            artists = db.query(song_service.model.artist).filter(
+                song_service.model.is_public == True
+            ).distinct().limit(50).all()
+            
+            albums = db.query(song_service.model.album).filter(
+                song_service.model.album.isnot(None),
+                song_service.model.is_public == True
+            ).distinct().limit(50).all()
+            
+            years = db.query(song_service.model.year).filter(
+                song_service.model.year.isnot(None),
+                song_service.model.is_public == True
+            ).distinct().all()
+            
+            filter_options = FilterOptionsSchema(
+                genres=[g[0] for g in genres if g[0]],
+                artists=[a[0] for a in artists if a[0]],
+                albums=[al[0] for al in albums if al[0]],
+                years=sorted([y[0] for y in years if y[0]], reverse=True),
+                difficulties=[1, 2, 3, 4, 5]
+            )
+            
+            return APIResponse.success(
+                "Filter options retrieved",
+                data=filter_options.model_dump()
+            )
+
+        except Exception as e:
+            return ErrorResponse.service_error(f"Failed to get filter options: {str(e)}")
+
+
+@songs_ns.route("/bulk-update")
+class BulkUpdate(Resource):
+    @songs_ns.doc("bulk_update_songs")
+    @jwt_required()
+    def put(self):
+        """Update multiple songs in bulk."""
+        try:
+            # Validate bulk update data
+            bulk_data = BulkUpdateSchema(**request.json)
+            db = get_db()
+            current_user_id = UUID(get_jwt_identity())
+            
+            # Perform bulk update
+            updated_songs = song_service.bulk_update_songs(
+                db, bulk_data.songs, current_user_id
+            )
+            
+            return APIResponse.success(
+                f"Updated {len(updated_songs)} songs",
+                data=[SongResponseSchema.model_validate(song).model_dump() for song in updated_songs]
+            )
+
+        except ValidationError as e:
+            return ErrorResponse.from_exception(e)
+        except Exception as e:
+            return ErrorResponse.service_error(f"Bulk update failed: {str(e)}")
+
+
+@songs_ns.route("/bulk-delete")
+class BulkDelete(Resource):
+    @songs_ns.doc("bulk_delete_songs")
+    @jwt_required()
+    def delete(self):
+        """Delete multiple songs in bulk."""
+        try:
+            # Get song IDs from request
+            data = request.get_json()
+            if not data or 'song_ids' not in data:
+                return ErrorResponse.bad_request("song_ids array is required")
+            
+            song_ids = [UUID(sid) for sid in data['song_ids']]
+            db = get_db()
+            current_user_id = UUID(get_jwt_identity())
+            
+            # Perform bulk delete
+            deleted_count = song_service.bulk_delete_songs(
+                db, song_ids, current_user_id
+            )
+            
+            return APIResponse.success(f"Deleted {deleted_count} songs")
+
+        except ValidationError as e:
+            return ErrorResponse.from_exception(e)
+        except Exception as e:
+            return ErrorResponse.service_error(f"Bulk delete failed: {str(e)}")
 
 
 @songs_ns.route("/<uuid:song_id>")
@@ -169,6 +383,48 @@ class SongResource(Resource):
             return ErrorResponse.service_error(f"Failed to delete song: {str(e)}")
 
 
+@songs_ns.route("/artist/<string:artist_name>")
+class ArtistSongs(Resource):
+    @songs_ns.doc("get_artist_songs")
+    def get(self, artist_name: str):
+        """Get songs by a specific artist."""
+        try:
+            limit = int(request.args.get('limit', 20))
+            limit = min(max(limit, 1), 100)  # Between 1 and 100
+            
+            db = get_db()
+            songs, total = song_service.get_artist_songs(db, artist_name, limit)
+            
+            return APIResponse.success(
+                f"Found {total} songs by {artist_name}",
+                data=[SongResponseSchema.model_validate(song).model_dump() for song in songs]
+            )
+
+        except Exception as e:
+            return ErrorResponse.service_error(f"Failed to get artist songs: {str(e)}")
+
+
+@songs_ns.route("/genre/<string:genre_name>")
+class GenreSongs(Resource):
+    @songs_ns.doc("get_genre_songs")
+    def get(self, genre_name: str):
+        """Get songs in a specific genre."""
+        try:
+            limit = int(request.args.get('limit', 20))
+            limit = min(max(limit, 1), 100)  # Between 1 and 100
+            
+            db = get_db()
+            songs, total = song_service.get_genre_songs(db, genre_name, limit)
+            
+            return APIResponse.success(
+                f"Found {total} songs in genre {genre_name}",
+                data=[SongResponseSchema.model_validate(song).model_dump() for song in songs]
+            )
+
+        except Exception as e:
+            return ErrorResponse.service_error(f"Failed to get genre songs: {str(e)}")
+
+
 @songs_ns.route("/<uuid:song_id>/rate")
 @songs_ns.param("song_id", "The song identifier")
 class SongRating(Resource):
@@ -196,7 +452,7 @@ class SongRating(Resource):
             # Update rating through service
             song_service.update_rating(db, song_id, rating)
 
-            return SchemaResponse.success("Song rated successfully")
+            return APIResponse.success("Song rated successfully")
 
         except ValidationError as e:
             return ErrorResponse.from_exception(e)
